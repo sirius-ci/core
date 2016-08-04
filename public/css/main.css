@@ -1,0 +1,18 @@
+@import url(http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700|Open+Sans:400,700&subset=latin,latin-ext);
+
+body {font-family: 'Open Sans', Arial, sans-serif; font-size: 13px; background-color: #fff;}
+a, a:hover, a:active, a:focus {text-decoration: none; outline: 0;}
+
+
+
+.buttons:before, .buttons:after {content: ''; display: table;}
+.buttons {text-align: right; margin: 20px 0;}
+
+.share-box:before, .share-box:after {content: " "; display: table;}
+.share-box {border-top: 1px dotted #ccc; padding-top: 15px; margin-top: 20px; margin-bottom: 20px;}
+.share-box p {margin-bottom: 5px;}
+.share-box > a {text-indent: -9999px; display: inline-block; margin-right: 5px;}
+.share-box > a.facebook {background: url(../img/share-facebook.png) no-repeat; width: 88px; height: 25px;}
+.share-box > a.twitter {background: url(../img/share-twitter.png) no-repeat; width: 79px; height: 25px;}
+.share-box > a.google {background: url(../img/share-google.png) no-repeat; width: 67px; height: 25px;}
+
