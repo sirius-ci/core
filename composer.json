@@ -1,8 +1,8 @@
 {
-    "name": "gurkanuzunca/sirius-ci",
+    "name": "sirius-ci/core",
     "description": "Cms Skeleton",
     "keywords": ["cms","panel","site"],
-    "homepage": "http://github.com/gurkanuzunca/sirius-ci",
+    "homepage": "https://github.com/sirius-ci/core",
     "type": "project",
     "license": "MIT",
     "authors": [
