@@ -71,6 +71,7 @@
                     <ul class="dropdown-menu">
                         <li><a href="home/options">Site Ayarları</a></li>
                         <li><a href="module/records">Modül Ayarları</a></li>
+                        <li><a href="module/repository">Yüklenebilir Modüller</a></li>
                     </ul>
                 </li>
                 <li class="profile dropdown" data-toggle="tooltip" data-placement="left" title="Profil">
