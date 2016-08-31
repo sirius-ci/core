@@ -1,8 +1,72 @@
 <?php
 
+/**
+ * Link yapıcı.
+ *
+ * @return string
+ */
+function makeUri()
+{
+    $arguments = func_get_args();
+    $params = array_slice($arguments, -1);
+    $params = $params[0];
+
+    $query = null;
+    $saveQuery = false;
+
+    if (is_array($params)) {
+        array_pop($arguments);
+
+        if (isset($params['query'])) {
+            $query = $params['query'];
+        }
+
+        if (isset($params['saveQuery']) && $params['saveQuery'] === true) {
+            $saveQuery = true;
+        }
+    }
+
+    if (is_array($arguments)) {
+        $arguments = implode('/', $arguments);
+    }
+
+
+    if (is_array($query)) {
+        $gets = http_build_query($saveQuery ? array_merge($_GET, $query) : $query);
+    } elseif ($saveQuery) {
+        $gets = http_build_query($_GET);
+    }
+
+
+
+    return $arguments . (! empty($gets) ? '?'.$gets : '');
+}
+
+
+
+function moduleUri()
+{
+    $arguments = func_get_args();
+
+    if (isset(get_instance()->module)) {
+        array_unshift($arguments, get_instance()->module);
+    }
+
+    return call_user_func_array('makeUri', $arguments);
+
+}
+
+/**
+ * Modül yapısına göre link yapıcı.
+ *
+ * @param array|string $segments Uri parametreleri
+ * @param null|array|string $query Querystring parametreleri
+ * @param bool|false $saveQuery Önceki querystring'leri korur
+ * @return string
+ */
 function clink($segments, $query = null, $saveQuery = false)
 {
-    if ( ! is_array($segments) && (strpos($segments, "http") === 0 || strpos($segments, '#') === 0)) {
+    if (! is_array($segments) && strpos($segments, "http") === 0 ) {
         return $segments;
     }
 
@@ -16,17 +80,16 @@ function clink($segments, $query = null, $saveQuery = false)
 
     $segments = implode('/', array_map('reservedUri', $segments));
 
-
-    if (is_array($query)) {
-        $gets = http_build_query($saveQuery ? array_merge($_GET, $query) : $query);
-    } elseif ($saveQuery) {
-        $gets = http_build_query($_GET);
-    }
-
-
-    return $segments . (! empty($gets) ? '?'.$gets : '');
+    return makeUri($segments, array('query' => $query, 'saveQuery' => $saveQuery));
 }
 
+
+/**
+ * Rezerve edilmiş modül url'lerini dile göre karşılığını verir.
+ *
+ * @param $uri
+ * @return mixed
+ */
 
 function reservedUri($uri)
 {

@@ -67,7 +67,6 @@ CREATE TABLE `modules` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `title` varchar(255) NOT NULL,
-  `table` varchar(255) NOT NULL,
   `modified` int(10) unsigned NOT NULL,
   `permissions` text NOT NULL,
   `type` varchar(255) DEFAULT NULL,

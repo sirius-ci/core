@@ -111,7 +111,6 @@ class InstallController extends CI_Controller
         $this->db->insert('modules', array(
             'title' => '',
             'name' => $this->module,
-            'table' => '',
             'modified' => 0,
             'permissions' => '',
             'type' =>  null,
@@ -131,6 +130,12 @@ class InstallController extends CI_Controller
         if (! empty($this->provider->steps)) {
             foreach ($this->provider->steps as $step) {
                 if (method_exists($this->provider, $step)) {
+                    $methods[] = $step;
+                }
+            }
+        } else {
+            foreach (get_class_methods($this->provider) as $step) {
+                if (strpos($step, '__') === false) {
                     $methods[] = $step;
                 }
             }

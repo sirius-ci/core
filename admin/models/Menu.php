@@ -1,9 +1,12 @@
 <?php
 
-class Menu extends CI_Model
-{
+use Admin\Models\AdminModel;
 
-    public function id($id)
+class Menu extends AdminModel
+{
+    private $table = 'menus';
+
+    public function find($id)
     {
         return $this->db
             ->from($this->table)
@@ -14,14 +17,10 @@ class Menu extends CI_Model
     }
 
 
-    public function all($limit = null, $offset = null)
+    public function all($paginate = [])
     {
-        $this->utils->filter();
-
-
-        if ($limit != null) {
-            $this->db->limit($limit, $offset);
-        }
+        $this->setFilter();
+        $this->setPaginate($paginate);
 
         return $this->db
             ->select("{$this->table}.*, (SELECT COUNT(id) FROM {$this->table} child WHERE child.parentId = {$this->table}.id) childs", false)
@@ -37,7 +36,7 @@ class Menu extends CI_Model
 
     public function count()
     {
-        $this->utils->filter();
+        $this->setFilter();
 
         return $this->db
             ->from($this->table)
@@ -47,14 +46,10 @@ class Menu extends CI_Model
     }
 
 
-    public function childAll($parent, $limit = null, $offset = null)
+    public function childAll($parent, $paginate = [])
     {
-        $this->utils->filter();
-
-
-        if ($limit != null) {
-            $this->db->limit($limit, $offset);
-        }
+        $this->setFilter();
+        $this->setPaginate($paginate);
 
         return $this->db
             ->select("{$this->table}.*, (SELECT COUNT(id) FROM {$this->table} child WHERE child.parentId = {$this->table}.id) childs", false)
@@ -67,9 +62,10 @@ class Menu extends CI_Model
             ->result();
     }
 
+
     public function childCount($parent)
     {
-        $this->utils->filter();
+        $this->setFilter();
 
         return $this->db
             ->from($this->table)
@@ -98,6 +94,7 @@ class Menu extends CI_Model
             ->result();
     }
 
+
     public function moduleLinks($module)
     {
         $return = array();
@@ -111,7 +108,6 @@ class Menu extends CI_Model
             $this->db->where('language', $this->language);
         }
 
-
         if (isset($pattern['moduleLink'])) {
             $return[] = (object) array(
                 'id' => '',
@@ -122,14 +118,12 @@ class Menu extends CI_Model
             );
         }
 
-
         if (isset($pattern['link']) && isset($pattern['title']) && isset($pattern['hint'])) {
             $results = $this->db
                 ->from($module->table)
                 ->order_by('id', 'asc')
                 ->get()
                 ->result();
-
 
             foreach ($results as $result) {
                 $link = array();
@@ -147,17 +141,15 @@ class Menu extends CI_Model
             }
         }
 
-
-
         return $return;
     }
+
 
     public function moduleLinkRecord($name, $id)
     {
         $module = $this->module($name);
 
         if ($module) {
-
             if ($id !== 'false') {
                 $module->record = $this->db
                     ->from($module->table)
@@ -171,30 +163,14 @@ class Menu extends CI_Model
     }
 
 
-
     public function insert($parent, $data)
     {
-        $lastOrderRecord = $this->db
-            ->from($this->table)
-            ->where('parentId', $parent->id)
-            ->where('language', $this->language)
-            ->order_by('order', 'desc')
-            ->limit(1)
-            ->get()
-            ->row();
-
-        $order = 1;
-
-        if ($lastOrderRecord) {
-            $order = $lastOrderRecord->order + 1;
-        }
-
         $this->db->insert($this->table, array(
             'parentId' => $parent->id,
             'title' => $data['title'],
             'hint' => $data['hint'],
             'link' => $data['link'],
-            'order' => $order,
+            'order' => $this->makeLastOrder(array('parentId' => $parent->id)),
             'language' => $this->language,
         ));
 
@@ -222,25 +198,10 @@ class Menu extends CI_Model
     }
 
 
-
     public function delete($data)
     {
-        if (is_array($data)) {
-            $success = $this->db
-                ->where_in('id', $data)
-                ->delete($this->table);
-
-            return $success;
-        }
-
-        $success = $this->db
-            ->where('id', $data->id)
-            ->delete($this->table);
-
-
-        return $success;
+        return parent::delete($this->table, $data);
     }
-
 
 
     public function parents($id)
@@ -250,7 +211,7 @@ class Menu extends CI_Model
         $record = $this->db->where('id', $id)->get($this->table)->row();
 
         if ($record) {
-            array_unshift($result, array('title' => $record->title, 'url' => clink(array($this->module, 'childs', $record->id))));
+            array_unshift($result, array('title' => $record->title, 'url' => moduleUri('childs', $record->id)));
 
             if ($record->parentId > 0) {
                 $this->parents($record->parentId, false);
@@ -258,47 +219,12 @@ class Menu extends CI_Model
         }
 
         return $result;
-
     }
 
 
-    public function order($ids = null)
+    public function order($ids)
     {
-        if (is_array($ids)) {
-            $records = $this->db
-                ->from($this->table)
-                ->where_in('id', $ids)
-                ->where('language', $this->language)
-                ->order_by('order', 'asc')
-                ->order_by('id', 'desc')
-                ->get()
-                ->result();
-
-            $firstOrder = 0;
-            $affected = 0;
-
-            foreach ($records as $record) {
-                if ($firstOrder === 0) {
-                    $firstOrder = $record->order;
-                }
-
-                $order = array_search($record->id, $ids) + $firstOrder;
-
-                if ($record->order != $order) {
-                    $this->db
-                        ->where('id', $record->id)
-                        ->update($this->table, array('order' => $order));
-
-                    if ($this->db->affected_rows() > 0) {
-                        $affected++;
-                    }
-                }
-
-            }
-
-            return $affected;
-        }
-
+        return parent::order($this->table, $ids);
     }
 
 
@@ -330,19 +256,6 @@ class Menu extends CI_Model
 
     public function groupDelete($data)
     {
-        if (is_array($data)) {
-            $success = $this->db
-                ->where_in('id', $data)
-                ->delete($this->table);
-
-            return $success;
-        }
-
-        $success = $this->db
-            ->where('id', $data->id)
-            ->delete($this->table);
-
-
-        return $success;
+        return parent::delete($this->table, $data);
     }
 } 

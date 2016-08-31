@@ -1,6 +1,8 @@
 <?php
 
-class Home extends CI_Model
+use Admin\Models\AdminModel;
+
+class Home extends AdminModel
 {
 
     public function widgets()
@@ -89,7 +91,7 @@ class Home extends CI_Model
     {
         $this->db
             ->where('id', $record->id)
-            ->update($this->table, array(
+            ->update('admin_users', array(
                 'password' => md5($this->input->post('password')),
             ));
 
@@ -100,26 +102,23 @@ class Home extends CI_Model
     public function user($id)
     {
         return $this->db
-            ->from($this->table)
+            ->from('admin_users')
             ->where('id', $id)
             ->get()
             ->row();
     }
 
-    public function userAll($limit = null, $offset = null)
+    public function userAll($paginate = [])
     {
-        $this->utils->filter();
-
-        if ($limit != null) {
-            $this->db->limit($limit, $offset);
-        }
+        $this->setFilter();
+        $this->setPaginate($paginate);
 
         return $this->db
-            ->select("{$this->table}.*, admin_groups.name groupName")
-            ->from($this->table)
-            ->join('admin_groups', "admin_groups.id = {$this->table}.groupId")
-            ->where("{$this->table}.groupId IS NOT NULL")
-            ->order_by("{$this->table}.id", 'asc')
+            ->select("admin_users.*, admin_groups.name groupName")
+            ->from('admin_users')
+            ->join('admin_groups', "admin_groups.id = admin_users.groupId")
+            ->where("admin_users.groupId IS NOT NULL")
+            ->order_by("admin_users.id", 'asc')
             ->get()
             ->result();
     }
@@ -127,10 +126,10 @@ class Home extends CI_Model
 
     public function userCount()
     {
-        $this->utils->filter();
+        $this->setFilter();
 
         return $this->db
-            ->from($this->table)
+            ->from('admin_users')
             ->where('groupId IS NOT NULL')
             ->count_all_results();
     }
@@ -138,7 +137,7 @@ class Home extends CI_Model
 
     public function userInsert($data = array())
     {
-        $this->db->insert($this->table, array(
+        $this->db->insert('admin_users', array(
             'username' => $this->input->post('username'),
             'password' => md5($this->input->post('password')),
             'groupId' => $this->input->post('group'),
@@ -156,7 +155,7 @@ class Home extends CI_Model
 
         $this->db
             ->where('id', $record->id)
-            ->update($this->table, array(
+            ->update('admin_users', array(
                 'username' => $this->input->post('username'),
                 'password' => !empty($password) ? md5($password) : $record->password,
                 'groupId' => $this->input->post('group')
@@ -169,19 +168,7 @@ class Home extends CI_Model
 
     public function userDelete($data)
     {
-        if (is_array($data)) {
-            $success = $this->db
-                ->where_in('id', $data)
-                ->delete($this->table);
-
-            return $success;
-        }
-
-        $success = $this->db
-            ->where('id', $data->id)
-            ->delete($this->table);
-
-        return $success;
+        return parent::delete('admin_users', $data);
     }
 
 
@@ -285,19 +272,7 @@ class Home extends CI_Model
 
     public function groupDelete($data)
     {
-        if (is_array($data)) {
-            $success = $this->db
-                ->where_in('id', $data)
-                ->delete('admin_groups');
-
-            return $success;
-        }
-
-        $success = $this->db
-            ->where('id', $data->id)
-            ->delete('admin_groups');
-
-        return $success;
+        return parent::delete('admin_groups', $data);
     }
 
 

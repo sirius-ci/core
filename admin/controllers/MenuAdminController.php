@@ -1,12 +1,11 @@
 <?php
 
-use Sirius\Admin\Manager;
+use Admin\Controllers\AdminController;
 
-class MenuAdminController extends Manager
+class MenuAdminController extends AdminController
 {
     public $moduleTitle = 'Menü Yönetimi';
     public $module = 'menu';
-    public $table = 'menus';
     public $model = 'menu';
 
 
@@ -14,94 +13,33 @@ class MenuAdminController extends Manager
     public $search = array('title', 'hint');
 
 
-    // Filtreleme yapılacak querystring/kolonlar.
-    // public $filter = array('group');
-
     public $actions = array(
         'records' => 'list',
-        'childs' => 'list',
-        'order' => 'list',
-        'module' => 'insert',
         'insert' => 'insert',
         'update' => 'update',
         'delete' => 'delete',
+        'order' => 'list',
+        'childs' => 'list',
+        'module' => 'insert',
         'groupInsert' => 'list',
         'groupUpdate' => 'list',
         'groupDelete' => 'list',
     );
 
 
-    public function childs()
+    public function records()
     {
-        if (! $parent = $this->appmodel->id($this->uri->segment(3))) {
-            show_404();
-        }
-
-        $records = array();
-        $pagination = null;
-        $recordCount = $this->appmodel->childCount($parent);
-
-        if ($recordCount > 0) {
-            $config = array(
-                'base_url' => clink(array($this->module, 'childs', $parent->id)),
-                'total_rows' => $recordCount,
-                'per_page' => 19
-            );
-
-            $this->load->library('pagination');
-            $this->pagination->initialize($config);
-
-
-            $records = $this->appmodel->childAll($parent, $this->pagination->per_page +1, $this->pagination->offset);
-            $pagination = $this->pagination->create_links();
-        }
-
-
-
-        // Navigasyon eklemeleri yapılır
-        $parents = $this->appmodel->parents($parent->id);
-
-        foreach ($parents as $bread){
-            $this->breadcrumb($bread['title'], $bread['url']);
-        }
-        $this->breadcrumb('Kayıtlar');
-
-        $this->viewData['parent'] = $parent;
-        $this->viewData['records'] = $records;
-        $this->viewData['pagination'] = $pagination;
-        $this->viewData['modules'] = $this->appmodel->moduleAll();
-
-
-        $this->load->vars('public', array('js' => array('../public/admin/js/module/menu.js')));
-
-        $this->render('childs');
+        parent::records();
+        $this->render('records');
     }
-
-
-    public function module()
-    {
-        $json = array('success' => false, 'html' => 'Kayıt bulunamadı.');
-        $module = $this->appmodel->module($this->uri->segment(3));
-
-        if ($module) {
-            $json['success'] = true;
-            $json['html'] = $this->load->view(clink(array($this->module, 'links')), array(
-                'records' => $this->appmodel->moduleLinks($module)
-            ), true);
-        }
-
-        echo json_encode($json);
-    }
-
 
 
     public function insert()
     {
-        $json = array('success' => false, 'html' => 'Kayıt bulunamadı.');
-        $parent = $this->appmodel->id($this->uri->segment(3));
+        $response = array('success' => false, 'html' => 'Kayıt bulunamadı.');
+        $parent = $this->appmodel->find($this->uri->segment(3));
 
         if ($parent) {
-
             $module = $this->input->post('module');
             $id = $this->input->post('id');
 
@@ -116,31 +54,111 @@ class MenuAdminController extends Manager
             $success = $this->appmodel->insert($parent, $data);
 
             if ($success) {
-                $json['success'] = true;
+                $response['success'] = true;
             }
         }
 
-        echo json_encode($json);
+        $this->json($response);
+    }
+
+
+    public function update()
+    {
+        parent::update();
+        $this->render('update');
     }
 
 
     public function updateRequest($record)
     {
-        // Navigasyon eklemeleri yapılır
+        $this->setParentsBread($record);
+    }
+
+
+    public function updateValidation()
+    {
+        $this->validate([
+            'title' => ['required', 'Lütfen Başlık yazınız.'],
+            'hint' => ['required', 'Lütfen Alt Başlık yazınız.'],
+            'link' => ['required', 'Lütfen Link yazınız.'],
+        ]);
+    }
+
+
+    public function delete()
+    {
+        parent::delete();
+    }
+
+
+    public function order()
+    {
+        parent::order();
+    }
+
+
+    public function childs()
+    {
+        if (! $parent = $this->appmodel->find($this->uri->segment(3))) {
+            show_404();
+        }
+
+        $records = array();
+        $paginate = null;
+        $recordCount = $this->appmodel->childCount();
+
+        if ($recordCount > 0) {
+            $paginate = $this->paginateForOrder($recordCount);
+            $records = $this->appmodel->all($paginate);
+        }
+
+        $this->setParentsBread($parent);
+
+        $this->utils->breadcrumb('Kayıtlar');
+
+        $this->viewData['parent'] = $parent;
+        $this->viewData['modules'] = $this->appmodel->moduleAll();
+        $this->viewData['records'] = $records;
+        $this->viewData['paginate'] = $paginate;
+
+        $this->assets->js('public/admin/js/module/menu.js');
+        $this->render('childs');
+    }
+
+
+    private function setParentsBread($record)
+    {
         $parents = $this->appmodel->parents($record->id);
 
         foreach ($parents as $bread){
-            $this->breadcrumb($bread['title'], $bread['url']);
+            $this->utils->breadcrumb($bread['title'], $bread['url']);
         }
     }
 
-    public function updateValidateRules()
+
+    public function module()
     {
-        $this->form_validation->set_rules('title', 'Lütfen Başlık yazınız.', 'required');
-        $this->form_validation->set_rules('hint', 'Lütfen Alt Başlık yazınız.', 'required');
-        $this->form_validation->set_rules('link', 'Lütfen Link yazınız.', 'required');
+        $response = array('success' => false, 'html' => 'Kayıt bulunamadı.');
+        $module = $this->appmodel->module($this->uri->segment(3));
+
+        if ($module) {
+            $response['success'] = true;
+            $response['html'] = $this->load->view(clink(array($this->module, 'links')), array(
+                'records' => $this->appmodel->moduleLinks($module)
+            ), true);
+        }
+
+        echo json_encode($response);
     }
 
+
+    private function groupValidation()
+    {
+        $this->validate([
+            'name' => array('required', 'Lütfen etiket yazınız.'),
+            'title' => array('required', 'Lütfen başlık yazınız.'),
+        ]);
+    }
 
 
     public function groupInsert()
@@ -150,31 +168,19 @@ class MenuAdminController extends Manager
         }
 
         if ($this->input->post()) {
-            $this->form_validation->set_rules('name', 'Lütfen Etiket yazınız.', 'required');
-            $this->form_validation->set_rules('title', 'Lütfen Başlık yazınız.', 'required');
+            $this->groupValidation();
 
-            if ($this->form_validation->run() === false) {
-                $this->utils->setAlert('danger', $this->form_validation->error_string('<div>&bull; ', '</div>'));
-            }
-
-            if (! $this->utils->isAlert()) {
+            if (! $this->alert->has('error')) {
                 $success = $this->appmodel->groupInsert($this->modelData);
 
                 if ($success) {
-                    $this->utils->setAlert('success', 'Kayıt eklendi.');
-
-                    if ($this->input->post('redirect')) {
-                        $redirect = $this->input->post('redirect');
-                    } else {
-                        $redirect = clink(array($this->module, 'groupUpdate', $success));
-                    }
-
-                    redirect($redirect);
+                    $this->alert->set('success', 'Kayıt eklendi.');
+                    $this->makeRedirect(moduleUri('groupUpdate', $success));
                 }
             }
         }
 
-        $this->breadcrumb('Yeni Menü Grubu Ekle');
+        $this->utils->breadcrumb('Yeni Menü Grubu Ekle');
         $this->render('group/insert');
     }
 
@@ -186,37 +192,26 @@ class MenuAdminController extends Manager
             redirect('home/denied');
         }
 
-        if (! $record = $this->appmodel->id($this->uri->segment(3))) {
+        if (! $record = $this->appmodel->find($this->uri->segment(3))) {
             show_404();
         }
 
         if ($this->input->post()) {
-            $this->form_validation->set_rules('name', 'Lütfen Etiket yazınız.', 'required');
-            $this->form_validation->set_rules('title', 'Lütfen Başlık yazınız.', 'required');
+            $this->groupValidation();
 
-            if ($this->form_validation->run() === false) {
-                $this->utils->setAlert('danger', $this->form_validation->error_string('<div>&bull; ', '</div>'));
-            }
-
-            if (! $this->utils->isAlert()) {
+            if (! $this->alert->has('error')) {
                 $success = $this->appmodel->groupUpdate($record, $this->modelData);
 
                 if ($success) {
-                    $this->utils->setAlert('success', 'Kayıt düzenlendi.');
-
-                    if ($this->input->post('redirect')) {
-                        $redirect = $this->input->post('redirect');
-                    } else {
-                        $redirect = clink(array($this->module, 'groupUpdate', $record->id));
-                    }
-
-                    redirect($redirect);
+                    $this->alert->set('success', 'Kayıt düzenlendi.');
+                    $this->makeRedirect(moduleUri('groupUpdate', $record->id));
                 }
-                $this->utils->setAlert('warning', 'Kayıt düzenlenmedi.');
+
+                $this->alert->set('warning', 'Kayıt düzenlenmedi.');
             }
         }
 
-        $this->breadcrumb('Menü Grubu Düzenle');
+        $this->utils->breadcrumb('Menü Grubu Düzenle');
         $this->viewData['record'] = $record;
         $this->render('group/update');
     }
@@ -236,17 +231,17 @@ class MenuAdminController extends Manager
             $ids = $this->input->post('ids');
 
             if (count($ids) == 0) {
-                $this->utils->setAlert('danger', 'Lütfen kayıt seçiniz.');
+                $this->alert->set('error', 'Lütfen kayıt seçiniz.');
                 echo $this->input->server('HTTP_REFERER');
             }
             $success = $this->appmodel->groupDelete($ids);
 
             if ($success) {
-                $this->utils->setAlert('success', "Kayıtlar başarıyla silindi.");
+                $this->alert->set('success', "Kayıtlar başarıyla silindi.");
                 echo $this->input->server('HTTP_REFERER');
             }
 
-            return true;
+            die();
         }
 
         if (! $this->isRoot()) {
@@ -256,18 +251,18 @@ class MenuAdminController extends Manager
         /**
          * Normal sorgu ise tekli silme uygulanır
          */
-        if (! $record = $this->appmodel->id($this->uri->segment(3))) {
+        if (! $record = $this->appmodel->find($this->uri->segment(3))) {
             show_404();
         }
 
         $success = $this->appmodel->groupDelete($record);
 
         if ($success) {
-            $this->utils->setAlert('success', "Kayıt kaldırıldı. (#{$record->id})");
+            $this->alert->set('success', "Kayıt kaldırıldı. (#{$record->id})");
             redirect($this->input->server('HTTP_REFERER'));
         }
 
-        $this->utils->setAlert('danger', 'Kayıt kaldırılamadı.');
+        $this->utils->setAlert('error', 'Kayıt kaldırılamadı.');
         redirect($this->input->server('HTTP_REFERER'));
 
     }

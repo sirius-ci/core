@@ -1,8 +1,8 @@
 <?php
 
-use Sirius\Admin\Manager;
+use Admin\Controllers\AdminController;
 
-class ModuleAdminController extends Manager
+class ModuleAdminController extends AdminController
 {
     private $repositoryPath = '../vendor/sirius-ci';
     private $backupPath = '../backup';
@@ -10,14 +10,11 @@ class ModuleAdminController extends Manager
 
     public $moduleTitle = 'Modüller';
     public $module = 'module';
-    public $table = 'modules';
     public $model = 'module';
 
     // Arama yapılacak kolonlar.
     public $search = array('title', 'name');
 
-    // Filtreleme yapılacak querystring/kolonlar.
-    // public $filter = array('type');
 
     public $actions = array(
         'records' => 'list',
@@ -29,44 +26,41 @@ class ModuleAdminController extends Manager
     );
 
 
-    /**
-     * @todo menuPattren linkPattern olarak değiştirilecek.
-     * @todo ön yüzdeki aktif modülde linkPattern verileri kullanarak otomatik link oluşturtulacak.
-     */
+    public function records()
+    {
+        parent::records();
+    }
+
+
     public function update()
     {
         if (! $record = $this->appmodel->name($this->uri->segment(3))) {
             show_404();
         }
+        $rules = array();
 
         if ($this->input->post()) {
             foreach ($record->arguments as $argument) {
                 if (! empty($argument->arguments)) {
-                    $this->form_validation->set_rules($argument->name, "Lütfen {$argument->title} geçerli bir değer veriniz.", implode('|', array_keys($argument->arguments)));
+                    $rules[$argument->name] = array(implode('|', array_keys($argument->arguments)), "Lütfen {$argument->title} geçerli bir değer veriniz.");
                 }
             }
 
-            if ($this->form_validation->run() === false) {
-                $this->utils->setAlert('danger', $this->form_validation->error_string('<div>&bull; ', '</div>'));
-            }
+            $this->validate($rules);
 
-            if (! $this->utils->isAlert()) {
+            if (! $this->alert->has('error')) {
                 $success = $this->appmodel->update($record);
 
                 if ($success) {
-                    $this->utils->setAlert('success', 'Kayıt düzenlendi.');
-                    redirect(clink(array($this->module, 'update', $record->name)));
+                    $this->alert->set('success', 'Kayıt düzenlendi.');
+                    redirect(moduleUri('update', $record->name));
                 }
-                $this->utils->setAlert('warning', 'Kayıt düzenlenmedi.');
+                $this->alert->set('warning', 'Kayıt düzenlenmedi.');
             }
         }
 
-        $this->load->vars('public', array('js' => array(
-            '../public/admin/plugin/ckeditor/ckeditor.js',
-            '../public/admin/plugin/ckfinder/ckfinder.js'
-        )));
-
-        $this->breadcrumb("{$record->title}: Düzenle");
+        $this->assets->importEditor();
+        $this->utils->breadcrumb("{$record->title}: Düzenle");
 
         $this->viewData['record'] = $record;
 
@@ -74,6 +68,17 @@ class ModuleAdminController extends Manager
     }
 
 
+
+    public function delete()
+    {
+        parent::delete();
+    }
+
+
+    public function order()
+    {
+        parent::order();
+    }
 
 
     public function repository()
@@ -87,7 +92,7 @@ class ModuleAdminController extends Manager
             }
         }
 
-        $this->breadcrumb('Yüklenebilir Modüller');
+        $this->utils->breadcrumb('Yüklenebilir Modüller');
 
         $this->viewData['records'] = $detectModules;
 
@@ -101,7 +106,7 @@ class ModuleAdminController extends Manager
         $detectModules = $this->detectModules();
 
         if (! isset($detectModules[$module])) {
-            $this->utils->setAlert('danger', 'Modül repository bulunamadı.');
+            $this->alert->set('error', 'Modül repository bulunamadı.');
             redirect($this->input->server('HTTP_REFERER'));
         }
 
@@ -111,7 +116,7 @@ class ModuleAdminController extends Manager
             'README.md'
         ));
 
-        $this->utils->setAlert('success', 'Modül başarıyla kopyalandı.');
+        $this->alert->set('success', 'Modül başarıyla kopyalandı.');
         redirect($this->input->server('HTTP_REFERER'));
     }
 
