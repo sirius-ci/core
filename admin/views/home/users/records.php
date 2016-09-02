@@ -1,5 +1,5 @@
 
-<?php echo $this->utils->alert(); ?>
+<?php echo $this->alert->flush(['error', 'success']); ?>
 
 <div class="panel panel-default">
     <div class="panel-heading"><i class="fa fa-table"></i> Kullanıcılar</div>

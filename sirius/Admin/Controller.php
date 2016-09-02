@@ -18,7 +18,7 @@ abstract class Controller extends Manager
         }
 
         if ($this->form_validation->run() === false) {
-            $this->alert->set('error', $this->form_validation->error());
+            $this->alert->set('error', $this->form_validation->errors());
 
             return false;
         }

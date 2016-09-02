@@ -2,7 +2,7 @@
 <div class="row">
     <form action="" method="post" enctype="multipart/form-data">
         <div class="col-md-8">
-            <?php echo $this->utils->alert(); ?>
+            <?php echo $this->alert->flush(['error', 'success']); ?>
 
 
             <div class="panel panel-default">
