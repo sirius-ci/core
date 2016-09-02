@@ -1,7 +1,11 @@
 <?php
 
-class Module extends CI_Model
+use Admin\Models\AdminModel;
+
+class Module extends AdminModel
 {
+
+    protected $table = 'modules';
 
     public function name($name)
     {
@@ -35,7 +39,7 @@ class Module extends CI_Model
 
     public function all($limit = null, $offset = null)
     {
-        $this->utils->filter();
+        $this->setFilter();
 
 
         if ($limit != null) {
@@ -61,7 +65,7 @@ class Module extends CI_Model
 
     public function count()
     {
-        $this->utils->filter();
+        $this->setFilter();
 
         return $this->db
             ->from($this->table)
@@ -88,64 +92,6 @@ class Module extends CI_Model
         }
 
         return $affected;
-    }
-
-
-
-    public function delete($data)
-    {
-        if (is_array($data)) {
-            $success = $this->db
-                ->where_in('id', $data)
-                ->delete($this->table);
-
-            return $success;
-        }
-
-        $success = $this->db
-            ->where('id', $data->id)
-            ->delete($this->table);
-
-        return $success;
-    }
-
-
-    public function order($ids = null)
-    {
-        if (is_array($ids)) {
-            $records = $this->db
-                ->from($this->table)
-                ->where_in('id', $ids)
-                ->order_by('order', 'asc')
-                ->order_by('id', 'desc')
-                ->get()
-                ->result();
-
-            $firstOrder = 0;
-            $affected = 0;
-
-            foreach ($records as $record) {
-                if ($firstOrder === 0) {
-                    $firstOrder = $record->order;
-                }
-
-                $order = array_search($record->id, $ids) + $firstOrder;
-
-                if ($record->order != $order) {
-                    $this->db
-                        ->where('id', $record->id)
-                        ->update($this->table, array('order' => $order));
-
-                    if ($this->db->affected_rows() > 0) {
-                        $affected++;
-                    }
-                }
-
-            }
-
-            return $affected;
-        }
-
     }
 
 

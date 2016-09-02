@@ -49,7 +49,7 @@
                     <ul class="dropdown-menu">
                         <?php foreach ($this->config->item('languages') as $language => $value): ?>
                             <li>
-                                <a href="home/language/<?php echo $language ?>?ref=<?php echo $this->module == 'home' ? '' : clink(array($this->module, 'records')) ?>">
+                                <a href="home/language/<?php echo $language ?>?ref=<?php echo $this->module == 'home' ? '' : moduleUri('records') ?>">
                                     <?php echo $value ?>
                                     <?php if ($this->language == $language): ?>
                                         <i class="fa fa-check"></i>

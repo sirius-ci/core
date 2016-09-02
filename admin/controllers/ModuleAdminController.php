@@ -29,6 +29,7 @@ class ModuleAdminController extends AdminController
     public function records()
     {
         parent::records();
+        $this->render('records');
     }
 
 

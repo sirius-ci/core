@@ -11,15 +11,20 @@ abstract class AdminController extends Controller
     /**
      * Tüm kayıtları sayfalama yaparak listeler.
      */
-    protected function records()
+    protected function records($methods = array())
     {
+        $methods = array_merge(array(
+            'count' => 'count',
+            'all' => 'all'
+        ), $methods);
+
         $records = array();
         $paginate = null;
-        $recordCount = $this->appmodel->count();
+        $recordCount = $this->appmodel->$methods['count']();
 
         if ($recordCount > 0) {
             $paginate = $this->paginateForOrder($recordCount);
-            $records = $this->appmodel->all($paginate);
+            $records = $this->appmodel->$methods['all']($paginate);
         }
 
 
@@ -33,9 +38,15 @@ abstract class AdminController extends Controller
 
     /**
      * Yeni kayıt ekleme
+     *
+     * @param array $methods
      */
-    protected function insert()
+    protected function insert($methods = array())
     {
+        $methods = array_merge(array(
+            'insert' => 'insert'
+        ), $methods);
+
         if ($this->input->post()) {
             $this->callMethodBreak(['insertValidation', 'validation']);
 
@@ -45,7 +56,7 @@ abstract class AdminController extends Controller
 
             if (! $this->alert->has('error')) {
                 $this->callMethod('insertBefore');
-                $success = $this->appmodel->insert($this->modelData);
+                $success = $this->appmodel->$methods['insert']($this->modelData);
 
                 if ($success) {
                     $this->callMethod('insertAfter');
@@ -62,10 +73,17 @@ abstract class AdminController extends Controller
 
     /**
      * Kayıt güncelleme
+     *
+     * @param array $methods
      */
-    protected function update()
+    protected function update($methods = array())
     {
-        if (! $record = $this->appmodel->find($this->uri->segment(3))) {
+        $methods = array_merge(array(
+            'update' => 'update',
+            'find' => 'find'
+        ), $methods);
+
+        if (! $record = $this->appmodel->$methods['find']($this->uri->segment(3))) {
             show_404();
         }
 
@@ -78,7 +96,7 @@ abstract class AdminController extends Controller
 
             if (! $this->alert->has('error')) {
                 $this->callMethod('updateBefore', $record);
-                $success = $this->appmodel->update($record, $this->modelData);
+                $success = $this->appmodel->$methods['update']($record, $this->modelData);
 
                 if ($success) {
                     $this->callMethod('updateAfter', $record);
@@ -99,10 +117,17 @@ abstract class AdminController extends Controller
 
     /**
      * Kayıt(lar) silme
-     * @return void
+     *
+     * @param array $methods
      */
-    protected function delete()
+    protected function delete($methods = array())
     {
+        $methods = array_merge(array(
+            'delete' => 'delete',
+            'find' => 'find',
+        ), $methods);
+
+
         /**
          * Ajax sorgusu  ise toplu silme uygulanır
          */
@@ -113,7 +138,8 @@ abstract class AdminController extends Controller
                 $this->alert->set('error', 'Lütfen kayıt seçiniz.');
                 echo $this->input->server('HTTP_REFERER');
             }
-            $success = $this->appmodel->delete($ids);
+
+            $success = $this->appmodel->$methods['delete']($ids);
 
             if ($success) {
                 $this->alert->set('success', "Kayıtlar başarıyla silindi.");
@@ -126,34 +152,40 @@ abstract class AdminController extends Controller
         /**
          * Normal sorgu ise tekli silme uygulanır
          */
-        if (! $record = $this->appmodel->find($this->uri->segment(3))) {
+        if (! $record = $this->appmodel->$methods['find']($this->uri->segment(3))) {
             show_404();
         }
 
-        $success = $this->appmodel->delete($record);
+        $success = $this->appmodel->$methods['delete']($record);
 
         if ($success) {
             $this->alert->set('success', "Kayıt kaldırıldı. (#{$record->id})");
             redirect($this->input->server('HTTP_REFERER'));
         }
 
-        $this->utils->setAlert('error', 'Kayıt kaldırılamadı.');
+        $this->alert->set('error', 'Kayıt kaldırılamadı.');
         redirect($this->input->server('HTTP_REFERER'));
 
     }
 
     /**
      * Sıralama işlemi yapar
+     *
+     * @param array $methods
      */
-    protected function order()
+    protected function order($methods = array())
     {
+        $methods = array_merge(array(
+            'order' => 'order'
+        ), $methods);
+
         $ids = explode(',', $this->input->post('ids'));
 
         if (count($ids) == 0){
             $this->alert->set('error', 'Lütfen kayıt seçiniz.');
         }
 
-        $success = $this->appmodel->order($ids);
+        $success = $this->appmodel->$methods['order']($ids);
 
         if ($success){
             $this->alert->set('success', "Kayıtlar başarıyla sıralandı.");

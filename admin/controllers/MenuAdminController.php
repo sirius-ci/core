@@ -148,7 +148,7 @@ class MenuAdminController extends AdminController
             ), true);
         }
 
-        echo json_encode($response);
+        $this->json($response);
     }
 
 
@@ -220,50 +220,15 @@ class MenuAdminController extends AdminController
 
     public function groupDelete()
     {
-        /**
-         * Ajax sorgusu  ise toplu silme uygulanır
-         */
-        if ($this->input->is_ajax_request()) {
-            if (! $this->isRoot()) {
-                echo 'home/denied';
-            }
-
-            $ids = $this->input->post('ids');
-
-            if (count($ids) == 0) {
-                $this->alert->set('error', 'Lütfen kayıt seçiniz.');
-                echo $this->input->server('HTTP_REFERER');
-            }
-            $success = $this->appmodel->groupDelete($ids);
-
-            if ($success) {
-                $this->alert->set('success', "Kayıtlar başarıyla silindi.");
-                echo $this->input->server('HTTP_REFERER');
-            }
-
-            die();
-        }
-
         if (! $this->isRoot()) {
-            redirect('home/denied');
+            if ($this->input->is_ajax_request()) {
+                echo 'home/denied';
+            } else {
+                redirect('home/denied');
+            }
         }
 
-        /**
-         * Normal sorgu ise tekli silme uygulanır
-         */
-        if (! $record = $this->appmodel->find($this->uri->segment(3))) {
-            show_404();
-        }
-
-        $success = $this->appmodel->groupDelete($record);
-
-        if ($success) {
-            $this->alert->set('success', "Kayıt kaldırıldı. (#{$record->id})");
-            redirect($this->input->server('HTTP_REFERER'));
-        }
-
-        $this->utils->setAlert('error', 'Kayıt kaldırılamadı.');
-        redirect($this->input->server('HTTP_REFERER'));
+        parent::delete(array('delete' => 'groupDelete'));
 
     }
 

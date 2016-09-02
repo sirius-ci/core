@@ -222,11 +222,9 @@ class Home extends AdminModel
 
 
 
-    public function groupAll($limit = null, $offset = null)
+    public function groupAll($paginate = [])
     {
-        if ($limit != null) {
-            $this->db->limit($limit, $offset);
-        }
+        $this->setPaginate($paginate);
 
         return $this->db
             ->from('admin_groups')

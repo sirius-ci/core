@@ -1,8 +1,8 @@
 
 <div class="row">
     <form action="" method="post" enctype="multipart/form-data">
-        <div class="col-md-8">
-            <?php echo $this->utils->alert(); ?>
+        <div class="col-md-6 col-md-offset-3">
+            <?php echo $this->alert->flush(['error', 'success']); ?>
 
             <div class="panel panel-default">
                 <div class="panel-heading"><i class="fa fa-plus-square"></i> Yeni Kayıt Ekle</div>
