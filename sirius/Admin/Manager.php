@@ -142,7 +142,9 @@ abstract class Manager extends \CI_Controller
             if (isset($this->actions[$action])) {
                 $this->permission($this->actions[$action], true);
             } else {
-                show_404();
+                if ($action !== 'login') {
+                    show_404();
+                }
             }
 
             // $this->breadcrumb($this->moduleTitle, "{$this->module}/{$this->defaultAction}");

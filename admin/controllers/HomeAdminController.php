@@ -10,7 +10,6 @@ class HomeAdminController extends AdminController
 
     public $actions = array(
         'dashboard'         => 'list',
-        'login'             => 'list',
         'logout'            => 'list',
         'denied'            => 'list',
         'language'          => 'list',
@@ -395,7 +394,9 @@ class HomeAdminController extends AdminController
             }
         }
 
-        $this->load->view('login');
+        $this->load->view('helpers/master', array(
+            'view' => 'helpers/home/login'
+        ));
     }
 
 
@@ -410,7 +411,9 @@ class HomeAdminController extends AdminController
 
     public function denied()
     {
-        $this->load->view('denied');
+        $this->load->view('helpers/master', array(
+            'view' => 'helpers/home/denied'
+        ));
     }
 
 
