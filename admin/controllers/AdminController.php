@@ -11,12 +11,16 @@ abstract class AdminController extends Controller
     /**
      * Tüm kayıtları sayfalama yaparak listeler.
      */
-    protected function records($methods = array())
+    protected function records($methods = array(), $events = array())
     {
         $methods = array_merge(array(
             'count' => 'count',
             'all' => 'all'
         ), $methods);
+
+        $events = array_merge(array(
+            'recordsRequest' => 'recordsRequest',
+        ), $events);
 
         $records = array();
         $paginate = null;
@@ -28,7 +32,7 @@ abstract class AdminController extends Controller
         }
 
 
-        $this->callMethod('recordsRequest');
+        $this->callMethod($events['recordsRequest']);
         $this->utils->breadcrumb('Kayıtlar');
 
         $this->viewData['records'] = $records;
@@ -40,26 +44,35 @@ abstract class AdminController extends Controller
      * Yeni kayıt ekleme
      *
      * @param array $methods
+     * @param $events $methods
      */
-    protected function insert($methods = array())
+    protected function insert($methods = array(), $events = array())
     {
         $methods = array_merge(array(
             'insert' => 'insert'
         ), $methods);
 
+        $events = array_merge(array(
+            'validation' => ['insertValidation', 'validation'],
+            'validationAfter' => ['insertValidationAfter', 'validationAfter'],
+            'insertBefore' => 'insertBefore',
+            'insertAfter' => 'insertAfter',
+            'insertRequest' => 'insertRequest',
+        ), $events);
+
         if ($this->input->post()) {
-            $this->callMethodBreak(['insertValidation', 'validation']);
+            $this->callMethodBreak($events['validation']);
 
             if (! $this->alert->has('error')) {
-                $this->callMethodBreak(['insertValidationAfter', 'validationAfter']);
+                $this->callMethodBreak($events['validationAfter']);
             }
 
             if (! $this->alert->has('error')) {
-                $this->callMethod('insertBefore');
+                $this->callMethod($events['insertBefore']);
                 $success = $this->appmodel->$methods['insert']($this->modelData);
 
                 if ($success) {
-                    $this->callMethod('insertAfter');
+                    $this->callMethod($events['insertAfter']);
                     $this->alert->set('success', 'Kayıt eklendi.');
 
                     $this->makeRedirect(moduleUri('update', $success));
@@ -67,7 +80,7 @@ abstract class AdminController extends Controller
             }
         }
 
-        $this->callMethod('insertRequest');
+        $this->callMethod($events['insertRequest']);
         $this->utils->breadcrumb('Yeni kayıt');
     }
 
@@ -76,30 +89,38 @@ abstract class AdminController extends Controller
      *
      * @param array $methods
      */
-    protected function update($methods = array())
+    protected function update($methods = array(), $events = array())
     {
         $methods = array_merge(array(
             'update' => 'update',
             'find' => 'find'
         ), $methods);
 
+        $events = array_merge(array(
+            'validation' => ['updateValidation', 'validation'],
+            'validationAfter' => ['updateValidationAfter', 'validationAfter'],
+            'updateBefore' => 'updateBefore',
+            'updateAfter' => 'updateAfter',
+            'updateRequest' => 'updateRequest',
+        ), $events);
+
         if (! $record = $this->appmodel->$methods['find']($this->uri->segment(3))) {
             show_404();
         }
 
         if ($this->input->post()) {
-            $this->callMethodBreak(['updateValidation', 'validation'], $record);
+            $this->callMethodBreak($events['validation'], $record);
 
             if (! $this->alert->has('error')) {
-                $this->callMethodBreak(['updateValidationAfter', 'validationAfter'], $record);
+                $this->callMethodBreak($events['validationAfter'], $record);
             }
 
             if (! $this->alert->has('error')) {
-                $this->callMethod('updateBefore', $record);
+                $this->callMethod($events['updateBefore'], $record);
                 $success = $this->appmodel->$methods['update']($record, $this->modelData);
 
                 if ($success) {
-                    $this->callMethod('updateAfter', $record);
+                    $this->callMethod($events['updateAfter'], $record);
                     $this->alert->set('success', 'Kayıt düzenlendi.');
 
                     $this->makeRedirect(moduleUri('update', $record->id));
@@ -109,7 +130,7 @@ abstract class AdminController extends Controller
             }
         }
 
-        $this->callMethod('updateRequest', $record);
+        $this->callMethod($events['updateRequest'], $record);
         $this->utils->breadcrumb('Kayıt Düzenle');
 
         $this->viewData['record'] = $record;
