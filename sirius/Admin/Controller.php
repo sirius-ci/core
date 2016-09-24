@@ -36,6 +36,7 @@ abstract class Controller extends Manager
         if ($this->input->post('redirect')) {
             $url = $this->input->post('redirect');
         }
+
         redirect($url);
     }
 
@@ -100,5 +101,22 @@ abstract class Controller extends Manager
             ->set_output(json_encode($data));
     }
 
+
+
+    public function createActuator()
+    {
+        $instance = new Actuator();
+        return $instance;
+    }
+
+
+    public function validOrCreateActuator(&$instance = null)
+    {
+        if ($instance instanceof Actuator) {
+            return $instance;
+        }
+
+        return $instance = $this->createActuator();
+    }
 
 } 

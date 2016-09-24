@@ -102,46 +102,34 @@ class HomeAdminController extends AdminController
 
     public function users()
     {
-        $records = array();
-        $paginate = null;
-        $recordCount = $this->appmodel->userCount();
-
-        if ($recordCount > 0) {
-            $paginate = $this->paginate($recordCount);
-            $records = $this->appmodel->userAll($paginate);
-        }
-
         $this->utils->breadcrumb('Kullanıcılar', moduleUri('users'));
-        $this->utils->breadcrumb('Kayıtlar');
 
-        $this->viewData['records'] = $records;
-        $this->viewData['paginate'] = $paginate;
+        parent::records(array(
+            'count' => 'userCount',
+            'all' => 'userAll',
+        ));
 
         $this->render('users/records');
     }
 
+    public function userInsertValidation()
+    {
+        $this->validate([
+            'username' => array('required', 'Lüfen kullanıcı adı yazın.'),
+            'password' => array('required', 'Lüfen parola yazın.'),
+            'group' => array('required|numeric', 'Lüfen kullanıcı grubu seçin.'),
+        ]);
+    }
 
     public function userInsert()
     {
-        if ($this->input->post()) {
-            $this->validate([
-                'username' => array('required', 'Lüfen kullanıcı adı yazın.'),
-                'password' => array('required', 'Lüfen parola yazın.'),
-                'group' => array('required|numeric', 'Lüfen kullanıcı grubu seçin.'),
-            ]);
-
-            if (! $this->alert->has('error')) {
-                $success = $this->appmodel->userInsert($this->modelData);
-
-                if ($success) {
-                    $this->alert->set('success', 'Kayıt eklendi.');
-                    redirect(moduleUri('userUpdate', $success));
-                }
-            }
-        }
-
         $this->utils->breadcrumb('Kullanıcılar', moduleUri('users'));
-        $this->utils->breadcrumb('Kayıt ekle');
+
+        parent::insert(array(
+            'insert' => 'userInsert',
+            'redirect' => array('userUpdate', '$success1'),
+            'validation' => 'userInsertValidation'
+        ));
 
         $this->render('users/insert');
     }

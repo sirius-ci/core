@@ -10,6 +10,9 @@ abstract class AdminController extends Controller
 
     /**
      * Tüm kayıtları sayfalama yaparak listeler.
+     *
+     * @param array $methods
+     * @param array $events
      */
     protected function records($methods = array(), $events = array())
     {
