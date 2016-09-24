@@ -7,14 +7,9 @@ class ModuleAdminController extends AdminController
     private $repositoryPath = '../vendor/sirius-ci';
     private $backupPath = '../backup';
 
-
     public $moduleTitle = 'Modüller';
     public $module = 'module';
     public $model = 'module';
-
-    // Arama yapılacak kolonlar.
-    public $search = array('title', 'name');
-
 
     public $actions = array(
         'records' => 'list',
@@ -25,32 +20,40 @@ class ModuleAdminController extends AdminController
         'init' => 'root',
     );
 
-
+    /**
+     * Modül listeleme.
+     *
+     * @success
+     */
     public function records()
     {
         parent::records();
         $this->render('records');
     }
 
-
-
+    /**
+     * Modül ayarları güncelleme.
+     *
+     * @success
+     */
     public function update()
     {
-        if (! $record = $this->appmodel->name($this->uri->segment(3))) {
+        if (!$record = $this->appmodel->name($this->uri->segment(3))) {
             show_404();
         }
+
         $rules = array();
 
         if ($this->input->post()) {
             foreach ($record->arguments as $argument) {
-                if (! empty($argument->arguments)) {
+                if (!empty($argument->arguments)) {
                     $rules[$argument->name] = array(implode('|', array_keys($argument->arguments)), "Lütfen {$argument->title} geçerli bir değer veriniz.");
                 }
             }
 
             $this->validate($rules);
 
-            if (! $this->alert->has('error')) {
+            if (!$this->alert->has('error')) {
                 $success = $this->appmodel->update($record);
 
                 if ($success) {
@@ -69,20 +72,31 @@ class ModuleAdminController extends AdminController
         $this->render('update');
     }
 
-
-
+    /**
+     * Modül silme.
+     *
+     * @success
+     */
     public function delete()
     {
         parent::delete();
     }
 
-
+    /**
+     * Modül sıralama.
+     *
+     * @success
+     */
     public function order()
     {
         parent::order();
     }
 
-
+    /**
+     * Yüklenebilir modüller.
+     *
+     * @success
+     */
     public function repository()
     {
         $detectModules = $this->detectModules();
@@ -101,13 +115,17 @@ class ModuleAdminController extends AdminController
         $this->render('repository');
     }
 
-
+    /**
+     * Modül dosyalarının yüklenmesi.
+     *
+     * @success
+     */
     public function init()
     {
         $module = $this->uri->segment(3);
         $detectModules = $this->detectModules();
 
-        if (! isset($detectModules[$module])) {
+        if (!isset($detectModules[$module])) {
             $this->alert->set('error', 'Modül repository bulunamadı.');
             redirect($this->input->server('HTTP_REFERER'));
         }
@@ -122,18 +140,25 @@ class ModuleAdminController extends AdminController
         redirect($this->input->server('HTTP_REFERER'));
     }
 
-
+    /**
+     * Modül dosya yükleme işlemi.
+     *
+     * @param string $source Kopyalanacak kaynağın dizin yolu.
+     * @param string $target Kopyalanacak yerin dizin yolu.
+     * @param array $ignoreFiles Kopyalanmayacak dizin ve dosyalar.
+     * @success
+     */
     private function initRepository($source, $target, $ignoreFiles = array())
     {
-        $backupPath = $this->backupPath .'/'. time();
+        $backupPath = $this->backupPath . '/' . time();
 
-        if (! is_dir($this->backupPath)) {
+        if (!is_dir($this->backupPath)) {
             mkdir($this->backupPath);
             chmod($this->backupPath, 0777);
         }
 
         foreach ($ignoreFiles as &$file) {
-            $file = $source .'/'. $file;
+            $file = $source . '/' . $file;
         }
 
         $this->copyFiles($source, $target, $backupPath, $ignoreFiles);
@@ -141,8 +166,14 @@ class ModuleAdminController extends AdminController
         @rmdir($backupPath);
     }
 
-
-
+    /**
+     * @param $source
+     * @param $target
+     * @param bool|false $backup
+     * @param array $ignoreFiles
+     * @return bool
+     * @success
+     */
     private function copyFiles($source, $target, $backup = false, $ignoreFiles = array())
     {
         foreach ($ignoreFiles as $file) {
@@ -167,7 +198,7 @@ class ModuleAdminController extends AdminController
         }
 
         // Hedef dizin yoksa hedef dizini oluştur. Üstte dizinse yedekle işlemi yapılmıştı.
-        if (! is_dir($target)) {
+        if (!is_dir($target)) {
             mkdir($target);
             chmod($target, 0777);
         }
@@ -176,7 +207,7 @@ class ModuleAdminController extends AdminController
 
         foreach ($sourceIterator as $iteratorFile) {
             // Dizin elemanlarının klasör olup olmadığı kontrol edilir.
-            if (! $iteratorFile->isDot()) {
+            if (!$iteratorFile->isDot()) {
                 $dirName = $iteratorFile->getFilename();
                 $backupPath = false;
 
@@ -192,16 +223,17 @@ class ModuleAdminController extends AdminController
     }
 
     /**
-     * Oluşturulan module kaynaklarını saptar.
+     * Oluşturulan modül kaynaklarını saptar.
      *
      * @throws \Exception
+     * @success
      */
     private function detectModules()
     {
         $modules = array();
 
         // Module dizin kontrolü yapılır.
-        if (! file_exists($this->repositoryPath)){
+        if (!file_exists($this->repositoryPath)) {
             throw new \Exception('Repository dizini bulunamadi.');
         }
 
@@ -209,13 +241,13 @@ class ModuleAdminController extends AdminController
 
         foreach ($moduleIterator as $iteratorFile) {
             // Dizin elemanlarının klasör olup olmadığı kontrol edilir.
-            if ($iteratorFile->isDir() && ! $iteratorFile->isDot()) {
+            if ($iteratorFile->isDir() && !$iteratorFile->isDot()) {
 
                 // Dizin ismini döndürür.
                 $moduleName = $iteratorFile->getFilename();
                 $modulePath = $iteratorFile->getPathname();
 
-                $modules[$moduleName] = (object) array(
+                $modules[$moduleName] = (object)array(
                     'id' => $moduleName,
                     'name' => ucfirst($moduleName),
                     'path' => $modulePath,
@@ -227,6 +259,4 @@ class ModuleAdminController extends AdminController
         return $modules;
     }
 
-
-
-} 
+}

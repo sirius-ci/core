@@ -2,6 +2,10 @@
 
 namespace Sirius\Admin;
 
+use Closure;
+use ReflectionClass;
+use Sirius\Admin\Exceptions\CallMethodException;
+
 
 abstract class Manager extends \CI_Controller
 {
@@ -147,7 +151,7 @@ abstract class Manager extends \CI_Controller
                 }
             }
 
-            // $this->breadcrumb($this->moduleTitle, "{$this->module}/{$this->defaultAction}");
+            $this->utils->breadcrumb($this->moduleTitle, "{$this->module}/{$this->defaultAction}");
         }
 
         /**
@@ -157,44 +161,87 @@ abstract class Manager extends \CI_Controller
     }
 
     /**
-     * Metodları tetikler.
-     *
-     * @param $methods
-     * @param array $args
-     * @param bool $break
-     * @return bool
+     * @param $callable
+     * @param array $arguments
+     * @return bool|mixed
      */
-    protected function callMethod($methods, $args = array(), $break = false)
+    protected function callMethod($callable, $arguments = array())
     {
-        if (! is_array($args)) {
-            $args = array($args);
+        // Method tanımlaması yoksa false döndürülür.
+        if (empty($callable)) {
+            return false;
         }
 
-        if (! is_array($methods)) {
-            $methods = array($methods);
+        if (! is_array($arguments)) {
+            $arguments = [$arguments];
         }
 
-        foreach ($methods as $method) {
-            if (method_exists($this, $method)) {
-                call_user_func_array(array($this, $method), $args);
+        // Method Closure ise çalıştırılır.
+        if ($callable instanceof Closure) {
+            return call_user_func_array($callable, $arguments);
+        }
 
-                if ($break === true) {
-                    break;
-                }
+        // Method string tanımdıysa CI objesinin methodu olarak tanımlanır.
+        if (is_string($callable)) {
+            $callable = [get_instance(), $callable];
+        }
+
+        // Method array olarak tanımlanmışsa.
+        if (is_array($callable)) {
+            // Arrayin ilk elemanı string ise arrayin başına CI objesi eklenerek
+            // Method CI objesinin metodu olarak tanımlanır.
+            if (is_string($callable[0])) {
+                array_unshift($callable, get_instance());
+            }
+
+            // Method arrayi 2 elemandan fazla ise argumanlar ayıklanır.
+            if (count($callable) > 2) {
+                // Tanımlı argumanlar ile Method'dan gönderilen argumanlar birleştirilir.
+                // Öncelik Methoddan gönderilen argumanlara verilir.
+                // @todo Öncelik konusu tartışmalı.
+                // Aynı method'un hem insert'te hem update'te kullanılma durumuna karşın,
+                // ön tanımlı argumanlar method'da olmayabileceğinden dolayı hataya sebebiyet verebilir.
+                $arguments = array_merge(array_slice($callable, 2), $arguments);
+
+                // Method ayıklanır.
+                $callable = array_slice($callable, 0, 2);
+            }
+
+
+            // Method çalıştırılır.
+            if (is_callable($callable)) {
+                return call_user_func_array($callable, $arguments);
             }
         }
+
+        return new CallMethodException('Event calistirilamadi.');
     }
 
     /**
      * Metodları tetikler.
      * Var olan bir method çalıştırıldığında diğerleri çalıştırılmaz.
      *
-     * @param $methods
-     * @param array $args
+     * @param $callables
+     * @param array $arguments
+     * @return bool|mixed
      */
-    protected function callMethodBreak($methods, $args = array())
+    protected function callMethodBreak($callables, $arguments = array())
     {
-        $this->callMethod($methods, $args, true);
+        if (! is_array($callables)){
+            $callables = array($callables);
+        }
+
+        foreach ($callables as $callable) {
+            $return = $this->callMethod($callables, $arguments);
+
+            if (! $return instanceof CallMethodException){
+                break;
+            }
+
+            return $return;
+
+        }
+
     }
 
     /**
@@ -215,7 +262,7 @@ abstract class Manager extends \CI_Controller
     {
         $module = $this->db->from('modules')->where('name', $this->module)->get()->row();
         $moduleUpdate = $module ? false : true;
-        $reflector = new \ReflectionClass($this);
+        $reflector = new ReflectionClass($this);
         $lastModified = filemtime($reflector->getFileName());
         $controller = $reflector->getName();
         $permissions = implode(',', array_unique($this->actions));

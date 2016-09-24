@@ -27,6 +27,9 @@ class HomeAdminController extends AdminController
     );
 
 
+    /**
+     * İlk giriş ekranı.
+     */
     public function dashboard()
     {
         $this->viewData['widgets'] = $this->appmodel->widgets();
@@ -35,7 +38,11 @@ class HomeAdminController extends AdminController
         $this->render('dashboard');
     }
 
-
+    /**
+     * Site ayarları.
+     *
+     * @success
+     */
     public function options()
     {
         $options = $this->appmodel->options();
@@ -69,7 +76,11 @@ class HomeAdminController extends AdminController
         $this->render('options');
     }
 
-
+    /**
+     * Kullanıcı parola değiştirme.
+     *
+     * @success
+     */
     public function password()
     {
         if (! $record = $this->appmodel->user($this->user->id)) {
@@ -86,7 +97,7 @@ class HomeAdminController extends AdminController
 
                 if ($success) {
                     $this->alert->set('success', 'Kayıt düzenlendi.');
-                    redirect(moduleUri('password', $record->id));
+                    redirect(moduleUri('password'));
                 }
 
                 $this->alert->set('warning', 'Kayıt düzenlenmedi.');
@@ -99,203 +110,180 @@ class HomeAdminController extends AdminController
         $this->render('password');
     }
 
-
+    /**
+     * Kullanıcı listesi.
+     *
+     * @success
+     */
     public function users()
     {
         $this->utils->breadcrumb('Kullanıcılar', moduleUri('users'));
 
         parent::records(array(
-            'count' => 'userCount',
-            'all' => 'userAll',
+            'count' => [$this->appmodel, 'userCount'],
+            'all' => [$this->appmodel, 'userAll'],
         ));
 
         $this->render('users/records');
     }
 
-    public function userInsertValidation()
-    {
-        $this->validate([
-            'username' => array('required', 'Lüfen kullanıcı adı yazın.'),
-            'password' => array('required', 'Lüfen parola yazın.'),
-            'group' => array('required|numeric', 'Lüfen kullanıcı grubu seçin.'),
-        ]);
-    }
-
+    /**
+     * Kullanıcı ekleme.
+     *
+     * @success
+     */
     public function userInsert()
     {
         $this->utils->breadcrumb('Kullanıcılar', moduleUri('users'));
 
         parent::insert(array(
-            'insert' => 'userInsert',
-            'redirect' => array('userUpdate', '$success1'),
-            'validation' => 'userInsertValidation'
+            'insert' => [$this->appmodel, 'userInsert'],
+            'validation' => 'userValidation',
+            'redirect' => 'userUpdate'
         ));
 
         $this->render('users/insert');
     }
 
-
+    /**
+     * Kullanıcı bilgisi güncelleme.
+     *
+     * @success
+     */
     public function userUpdate()
     {
-        if (! $record = $this->appmodel->user($this->uri->segment(3))) {
-            show_404();
-        }
-
-        if ($this->input->post()) {
-            $this->validate([
-                'username' => array('required', 'Lüfen kullanıcı adı yazın.'),
-                'group' => array('required|numeric', 'Lütfen kullanıcı grubu seçin.'),
-            ]);
-
-            if (! $this->alert->has('error')) {
-                $success = $this->appmodel->userUpdate($record, $this->modelData);
-
-                if ($success) {
-                    $this->alert->set('success', 'Kayıt düzenlendi.');
-                    redirect(moduleUri('userUpdate', $record->id));
-                }
-                $this->alert->set('warning', 'Kayıt düzenlenmedi.');
-            }
-        }
-
         $this->utils->breadcrumb('Kullanıcılar', moduleUri('users'));
-        $this->utils->breadcrumb('Kayıt Düzenle');
 
-        $this->viewData['record'] = $record;
+        parent::update(array(
+            'find' => [$this->appmodel, 'user'],
+            'update' => [$this->appmodel, 'userUpdate'],
+            'validation' => 'userValidation',
+            'redirect' => 'userUpdate'
+        ));
+
         $this->viewData['groups'] = $this->appmodel->getGroups();
-
         $this->render('users/update');
+
     }
 
+    /**
+     * Kullanıcı doğrulaması.
+     * @param string $type Validasyon türü (insert|update)
+     */
+    public function userValidation($type)
+    {
+        $rules = [
+            'username' => array('required', 'Lüfen kullanıcı adı yazın.'),
+            'group' => array('required|numeric', 'Lütfen kullanıcı grubu seçin.'),
+        ];
 
+        if ($type === 'insert') {
+            $rules['password'] = array('required', 'Lüfen parola yazın.');
+        }
+
+        $this->validate($rules);
+    }
+
+    /**
+     * Kullanıcı silme.
+     *
+     * @success
+     */
     public function userDelete()
     {
-        parent::delete(array('delete' => 'userDelete', 'find' => 'user'));
-
+        parent::delete(array(
+            'delete' => [$this->appmodel, 'userDelete'],
+            'find' => [$this->appmodel, 'user']
+        ));
     }
 
-
+    /**
+     * Kullanıcı grupları.
+     *
+     * @success
+     */
     public function groups()
     {
-        $records = array();
-        $paginate = null;
-        $recordCount = $this->appmodel->groupCount();
-
-        if ($recordCount > 0) {
-            $paginate = $this->paginate($recordCount);
-            $records = $this->appmodel->groupAll($paginate);
-        }
-
         $this->utils->breadcrumb('Gruplar', moduleUri('groups'));
-        $this->utils->breadcrumb('Kayıtlar');
 
-        $this->viewData['records'] = $records;
-        $this->viewData['paginate'] = $paginate;
+        parent::records(array(
+            'count' => [$this->appmodel, 'groupCount'],
+            'all' => [$this->appmodel, 'groupAll']
+        ));
 
         $this->render('groups/records');
-
     }
 
-
+    /**
+     * Kullanıcı grubu ekleme.
+     *
+     * @success
+     */
     public function groupInsert()
     {
-        if ($this->input->post()) {
-            $this->validate([
-                'name' => array('required', 'Lüfen grup adı yazın.')
-            ]);
-
-            if (! $this->alert->has('error')) {
-                $success = $this->appmodel->groupInsert($this->modelData);
-
-                if ($success) {
-                    $this->alert->set('success', 'Kayıt eklendi.');
-                    redirect(moduleUri('groupUpdate', $success));
-                }
-            }
-        }
-
-
         $this->utils->breadcrumb('Gruplar', moduleUri('groups'));
-        $this->utils->breadcrumb('Kayıt ekle');
 
+        parent::insert(array(
+            'insert' => [$this->appmodel, 'groupInsert'],
+            'validation' => 'groupValidation',
+            'redirect' => 'groupUpdate'
+        ));
 
         $this->render('groups/insert');
 
     }
 
-
+    /**
+     * Kullanıcı grubu güncelleme.
+     *
+     * @success
+     */
     public function groupUpdate()
     {
-        if (! $record = $this->appmodel->group($this->uri->segment(3))) {
-            show_404();
-        }
-
-        if ($this->input->post()) {
-            $this->validate([
-                'name' => array('required', 'Lüfen grup adı yazın.')
-            ]);
-
-            if (! $this->alert->has('error')) {
-                $success = $this->appmodel->groupUpdate($record, $this->modelData);
-
-                if ($success) {
-                    $this->alert->set('success', 'Kayıt düzenlendi.');
-                    redirect(moduleUri('groupUpdate', $record->id));
-                }
-                $this->alert->set('warning', 'Kayıt düzenlenmedi.');
-            }
-        }
-
         $this->utils->breadcrumb('Gruplar', moduleUri('groups'));
-        $this->utils->breadcrumb('Kayıt Düzenle');
 
-        $this->viewData['record'] = $record;
+        parent::update(array(
+            'find' => [$this->appmodel, 'group'],
+            'update' => [$this->appmodel, 'groupUpdate'],
+            'validation' => 'groupValidation',
+            'redirect' => 'groupUpdate'
+
+        ));
+
         $this->viewData['modules'] = $this->appmodel->getModules();
-
         $this->assets->js('public/admin/js/module/home.js');
         $this->render('groups/update');
     }
 
+    /**
+     * Kullanıcı grubu doğrulaması.
+     */
+    public function groupValidation()
+    {
+        $this->validate([
+            'name' => array('required', 'Lüfen grup adı yazın.')
+        ]);
+    }
 
+    /**
+     * Kullanıcı grubu silme.
+     *
+     * @success
+     */
     public function groupDelete()
     {
-        // Ajax sorgusu  ise toplu silme uygulanır
-        if ($this->input->is_ajax_request()) {
-            $ids = $this->input->post('ids');
-
-            if (count($ids) == 0) {
-                $this->alert->set('error', 'Lütfen kayıt seçiniz.');
-                echo $this->input->server('HTTP_REFERER');
-            }
-
-            $success = $this->appmodel->groupDelete($ids);
-
-            if ($success) {
-                $this->alert->set('success', "Kayıtlar başarıyla silindi.");
-                echo $this->input->server('HTTP_REFERER');
-            }
-
-            die();
-        }
-
-        // Normal sorgu ise tekli silme uygulanır
-        if (! $record = $this->appmodel->group($this->uri->segment(3))) {
-            show_404();
-        }
-
-        $success = $this->appmodel->groupDelete($record);
-
-        if ($success) {
-            $this->alert->set('success', "Kayıt kaldırıldı. (#{$record->id})");
-            redirect($this->input->server('HTTP_REFERER'));
-        }
-
-        $this->alert->set('error', 'Kayıt kaldırılamadı.');
-        redirect($this->input->server('HTTP_REFERER'));
+        parent::delete(array(
+            'delete' => [$this->appmodel, 'groupDelete'],
+            'find' => [$this->appmodel, 'group']
+        ));
 
     }
 
-
+    /**
+     * Kullanıcı grubu yetkilendirme günzellemesi.
+     *
+     * @success
+     */
     public function groupPermsUpdate()
     {
         if (! $record = $this->appmodel->group($this->uri->segment(3))) {
@@ -313,7 +301,11 @@ class HomeAdminController extends AdminController
         redirect(moduleUri('groupUpdate', $record->id));
     }
 
-
+    /**
+     * Giriş kontrolleri.
+     *
+     * @success
+     */
     public function login()
     {
         if ($this->session->userdata('adminlogin') === true) {
@@ -354,7 +346,11 @@ class HomeAdminController extends AdminController
         ));
     }
 
-
+    /**
+     * Çıkış, oturumu kapatma.
+     *
+     * @success
+     */
     public function logout()
     {
         $this->session->unset_userdata('adminlogin');
@@ -363,7 +359,11 @@ class HomeAdminController extends AdminController
         redirect(moduleUri('login'));
     }
 
-
+    /**
+     * Yetkisiz sayfa erişimi uyarı sayfası.
+     *
+     * @sucess
+     */
     public function denied()
     {
         $this->load->view('helpers/master', array(
@@ -371,7 +371,11 @@ class HomeAdminController extends AdminController
         ));
     }
 
-
+    /**
+     * Aktif panel dilini değiştirme.
+     *
+     * @success
+     */
     public function language()
     {
         $languages = $this->config->item('languages');

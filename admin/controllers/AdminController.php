@@ -12,30 +12,27 @@ abstract class AdminController extends Controller
      * Tüm kayıtları sayfalama yaparak listeler.
      *
      * @param array $methods
-     * @param array $events
      */
-    protected function records($methods = array(), $events = array())
+    protected function records($methods = array())
     {
         $methods = array_merge(array(
-            'count' => 'count',
-            'all' => 'all'
+            'count' => [$this->appmodel, 'count'],
+            'all' => [$this->appmodel, 'all'],
+            'recordsRequest' => 'recordsRequest',
         ), $methods);
 
-        $events = array_merge(array(
-            'recordsRequest' => 'recordsRequest',
-        ), $events);
 
         $records = array();
         $paginate = null;
-        $recordCount = $this->appmodel->$methods['count']();
+        $recordCount = $this->callMethod($methods['count']);
 
         if ($recordCount > 0) {
             $paginate = $this->paginateForOrder($recordCount);
-            $records = $this->appmodel->$methods['all']($paginate);
+            $records = $this->callMethod($methods['all'], [$paginate]);
         }
 
 
-        $this->callMethod($events['recordsRequest']);
+        $this->callMethod($methods['recordsRequest']);
         $this->utils->breadcrumb('Kayıtlar');
 
         $this->viewData['records'] = $records;
@@ -43,97 +40,114 @@ abstract class AdminController extends Controller
 
     }
 
+
+
+
     /**
      * Yeni kayıt ekleme
      *
      * @param array $methods
-     * @param $events $methods
      */
-    protected function insert($methods = array(), $events = array())
+    protected function insert($methods = array())
     {
         $methods = array_merge(array(
-            'insert' => 'insert'
-        ), $methods);
-
-        $events = array_merge(array(
-            'validation' => ['insertValidation', 'validation'],
-            'validationAfter' => ['insertValidationAfter', 'validationAfter'],
+            'insert' => [$this->appmodel, 'insert'],
+            'validation' => 'validation',
+            'validationAfter' => 'validationAfter',
             'insertBefore' => 'insertBefore',
             'insertAfter' => 'insertAfter',
             'insertRequest' => 'insertRequest',
-        ), $events);
+        ), $methods);
+
 
         if ($this->input->post()) {
-            $this->callMethodBreak($events['validation']);
+            $this->callMethod($methods['validation'], 'insert');
 
             if (! $this->alert->has('error')) {
-                $this->callMethodBreak($events['validationAfter']);
+                $this->callMethod($methods['validationAfter'], 'insert');
             }
 
             if (! $this->alert->has('error')) {
-                $this->callMethod($events['insertBefore']);
-                $success = $this->appmodel->$methods['insert']($this->modelData);
+                $this->callMethod($methods['insertBefore']);
+
+                $success = $this->callMethod($methods['insert'], $this->modelData);
 
                 if ($success) {
-                    $this->callMethod($events['insertAfter']);
+                    $this->callMethod($methods['insertAfter']);
                     $this->alert->set('success', 'Kayıt eklendi.');
 
-                    $this->makeRedirect(moduleUri('update', $success));
+                    if (isset($methods['redirect'])) {
+                        $methods['redirect'] = ! is_array($methods['redirect']) ? array($methods['redirect']) : $methods['redirect'];
+                        $methods['redirect'][] = $success;
+                        $redirect = call_user_func_array('moduleUri', $methods['redirect']);
+                    } else {
+                        $redirect = moduleUri('update', $success);
+                    }
+
+                    $this->makeRedirect($redirect);
+
                 }
             }
         }
 
-        $this->callMethod($events['insertRequest']);
+        $this->callMethod($methods['insertRequest']);
         $this->utils->breadcrumb('Yeni kayıt');
     }
+
 
     /**
      * Kayıt güncelleme
      *
      * @param array $methods
      */
-    protected function update($methods = array(), $events = array())
+    protected function update($methods = array())
     {
         $methods = array_merge(array(
-            'update' => 'update',
-            'find' => 'find'
-        ), $methods);
-
-        $events = array_merge(array(
-            'validation' => ['updateValidation', 'validation'],
-            'validationAfter' => ['updateValidationAfter', 'validationAfter'],
+            'update' => [$this->appmodel, 'update'],
+            'find' => [$this->appmodel, 'find'],
+            'validation' => 'validation',
+            'validationAfter' =>'validationAfter',
             'updateBefore' => 'updateBefore',
             'updateAfter' => 'updateAfter',
             'updateRequest' => 'updateRequest',
-        ), $events);
+        ), $methods);
 
-        if (! $record = $this->appmodel->$methods['find']($this->uri->segment(3))) {
+
+        if (! $record = $this->callMethod($methods['find'], $this->uri->segment(3))) {
             show_404();
         }
 
         if ($this->input->post()) {
-            $this->callMethodBreak($events['validation'], $record);
+            $this->callMethod($methods['validation'], ['update', $record]);
 
             if (! $this->alert->has('error')) {
-                $this->callMethodBreak($events['validationAfter'], $record);
+                $this->callMethod($methods['validationAfter'], ['update', $record]);
             }
 
             if (! $this->alert->has('error')) {
-                $this->callMethod($events['updateBefore'], $record);
-                $success = $this->appmodel->$methods['update']($record, $this->modelData);
+                $this->callMethod($methods['updateBefore'], $record);
+                $success = $this->callMethod($methods['update'], [$record, $this->modelData]);
 
                 if ($success) {
-                    $this->callMethod($events['updateAfter'], $record);
+                    $this->callMethod($methods['updateAfter'], $record);
                     $this->alert->set('success', 'Kayıt düzenlendi.');
 
-                    $this->makeRedirect(moduleUri('update', $record->id));
+                    if (isset($methods['redirect'])) {
+                        $methods['redirect'] = ! is_array($methods['redirect']) ? array($methods['redirect']) : $methods['redirect'];
+                        $methods['redirect'][] = $record->id;
+                        $redirect = call_user_func_array('moduleUri', $methods['redirect']);
+                    } else {
+                        $redirect = moduleUri('update', $record->id);
+                    }
+
+                    $this->makeRedirect($redirect);
                 }
 
                 $this->alert->set('warning', 'Kayıt düzenlenmedi.');
             }
         }
 
-        $this->callMethod($events['updateRequest'], $record);
+        $this->callMethod($methods['updateRequest'], $record);
         $this->utils->breadcrumb('Kayıt Düzenle');
 
         $this->viewData['record'] = $record;
@@ -147,8 +161,8 @@ abstract class AdminController extends Controller
     protected function delete($methods = array())
     {
         $methods = array_merge(array(
-            'delete' => 'delete',
-            'find' => 'find',
+            'delete' => [$this->appmodel, 'delete'],
+            'find' => [$this->appmodel, 'find'],
         ), $methods);
 
 
@@ -163,7 +177,8 @@ abstract class AdminController extends Controller
                 echo $this->input->server('HTTP_REFERER');
             }
 
-            $success = $this->appmodel->$methods['delete']($ids);
+
+            $success = $this->callMethod($methods['delete'], $ids);
 
             if ($success) {
                 $this->alert->set('success', "Kayıtlar başarıyla silindi.");
@@ -176,7 +191,7 @@ abstract class AdminController extends Controller
         /**
          * Normal sorgu ise tekli silme uygulanır
          */
-        if (! $record = $this->appmodel->$methods['find']($this->uri->segment(3))) {
+        if (! $record = $this->callMethod($methods['find'], $this->uri->segment(3))) {
             show_404();
         }
 
@@ -200,7 +215,7 @@ abstract class AdminController extends Controller
     protected function order($methods = array())
     {
         $methods = array_merge(array(
-            'order' => 'order'
+            'order' => [$this->appmodel, 'order']
         ), $methods);
 
         $ids = explode(',', $this->input->post('ids'));
@@ -209,7 +224,7 @@ abstract class AdminController extends Controller
             $this->alert->set('error', 'Lütfen kayıt seçiniz.');
         }
 
-        $success = $this->appmodel->$methods['order']($ids);
+        $success = $this->callMethod($methods['order'], $ids);
 
         if ($success){
             $this->alert->set('success', "Kayıtlar başarıyla sıralandı.");
