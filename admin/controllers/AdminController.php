@@ -160,8 +160,7 @@ abstract class AdminController extends Controller
                 echo $this->input->server('HTTP_REFERER');
             }
 
-
-            $success = $this->callMethod($methods['delete'], $ids);
+            $success = $this->callMethod($methods['delete'], [$ids]);
 
             if ($success) {
                 $this->alert->set('success', "Kayıtlar başarıyla silindi.");
@@ -178,7 +177,7 @@ abstract class AdminController extends Controller
             show_404();
         }
 
-        $success = $this->appmodel->$methods['delete']($record);
+        $success = $this->callMethod($methods['delete'], $record);
 
         if ($success) {
             $this->alert->set('success', "Kayıt kaldırıldı. (#{$record->id})");
@@ -207,7 +206,7 @@ abstract class AdminController extends Controller
             $this->alert->set('error', 'Lütfen kayıt seçiniz.');
         }
 
-        $success = $this->callMethod($methods['order'], $ids);
+        $success = $this->callMethod($methods['order'], [$ids]);
 
         if ($success){
             $this->alert->set('success', "Kayıtlar başarıyla sıralandı.");
@@ -215,4 +214,4 @@ abstract class AdminController extends Controller
     }
 
 
-} 
+}
