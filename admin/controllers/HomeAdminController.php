@@ -46,9 +46,10 @@ class HomeAdminController extends AdminController
     public function options()
     {
         $options = $this->appmodel->options();
-        $rules = array();
 
         if ($this->input->post()) {
+            $rules = array();
+
             foreach ($options as $option) {
                 if (! empty($option->arguments)) {
                     $rules[$option->name] = array(implode('|', array_keys($option->arguments)), "Lütfen {$option->title} geçerli bir değer veriniz.");
@@ -62,7 +63,7 @@ class HomeAdminController extends AdminController
 
                 if ($success) {
                     $this->alert->set('success', 'Kayıt düzenlendi.');
-                    redirect(moduleUri('options'));
+                    $this->makeRedirect('options');
                 }
                 $this->alert->set('warning', 'Kayıt düzenlenmedi.');
             }
@@ -83,31 +84,28 @@ class HomeAdminController extends AdminController
      */
     public function password()
     {
-        if (! $record = $this->appmodel->user($this->user->id)) {
-            show_404();
-        }
-
-        if ($this->input->post()) {
-            $this->validate([
-                'password' => ['required', 'Lüfen parola yazın.']
-            ]);
-
-            if (! $this->alert->has('error')) {
-                $success = $this->appmodel->passwordChange($record);
-
-                if ($success) {
-                    $this->alert->set('success', 'Kayıt düzenlendi.');
-                    redirect(moduleUri('password'));
-                }
-
-                $this->alert->set('warning', 'Kayıt düzenlenmedi.');
-            }
-        }
-
         $this->utils->breadcrumb('Parola Değiştir');
-        $this->viewData['record'] = $record;
+
+        parent::update([
+            'find' => [$this->appmodel, 'user', $this->user->id],
+            'update' => [$this->appmodel, 'passwordChange'],
+            'validation' => 'passwordValidation',
+            'redirect' => ['password']
+        ]);
 
         $this->render('password');
+    }
+
+    /**
+     * Parola düzenleme validasyon.
+     *
+     * @param $action
+     */
+    public function passwordValidation($action)
+    {
+        $this->validate([
+            'password' => ['required', 'Lüfen parola yazın.']
+        ]);
     }
 
     /**
@@ -139,7 +137,7 @@ class HomeAdminController extends AdminController
         parent::insert(array(
             'insert' => [$this->appmodel, 'userInsert'],
             'validation' => 'userValidation',
-            'redirect' => 'userUpdate'
+            'redirect' => ['userUpdate', '@id']
         ));
 
         $this->render('users/insert');
@@ -158,7 +156,7 @@ class HomeAdminController extends AdminController
             'find' => [$this->appmodel, 'user'],
             'update' => [$this->appmodel, 'userUpdate'],
             'validation' => 'userValidation',
-            'redirect' => 'userUpdate'
+            'redirect' => ['userUpdate', '@id']
         ));
 
         $this->viewData['groups'] = $this->appmodel->getGroups();
@@ -226,7 +224,7 @@ class HomeAdminController extends AdminController
         parent::insert(array(
             'insert' => [$this->appmodel, 'groupInsert'],
             'validation' => 'groupValidation',
-            'redirect' => 'groupUpdate'
+            'redirect' => ['groupUpdate', '@id']
         ));
 
         $this->render('groups/insert');
@@ -246,7 +244,7 @@ class HomeAdminController extends AdminController
             'find' => [$this->appmodel, 'group'],
             'update' => [$this->appmodel, 'groupUpdate'],
             'validation' => 'groupValidation',
-            'redirect' => 'groupUpdate'
+            'redirect' => ['groupUpdate', '@id']
 
         ));
 

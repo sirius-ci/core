@@ -29,15 +29,29 @@ abstract class Controller extends Manager
     /**
      * Yönlendirme işlemleri.
      *
-     * @param $url
+     * @param $params
+     * @param null $record
      */
-    public function makeRedirect($url)
+    public function makeRedirect($params, $record = null)
     {
         if ($this->input->post('redirect')) {
-            $url = $this->input->post('redirect');
+            $params = explode('/', $this->input->post('redirect'));
+        } else {
+            $params = ! is_array($params) ? array($params) : $params;
         }
 
-        redirect($url);
+
+
+        if ($record !== null) {
+            foreach ($params as &$param) {
+                if ($param[0] === '@') {
+                    $column = str_replace('@', '', $param);
+                    isset($record->$column) && $param = $record->$column;
+                }
+            }
+        }
+
+        redirect(call_user_func_array('moduleUri', $params));
     }
 
     /**

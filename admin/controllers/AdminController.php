@@ -21,7 +21,6 @@ abstract class AdminController extends Controller
             'recordsRequest' => 'recordsRequest',
         ), $methods);
 
-
         $records = array();
         $paginate = null;
         $recordCount = $this->callMethod($methods['count']);
@@ -30,7 +29,6 @@ abstract class AdminController extends Controller
             $paginate = $this->paginateForOrder($recordCount);
             $records = $this->callMethod($methods['all'], [$paginate]);
         }
-
 
         $this->callMethod($methods['recordsRequest']);
         $this->utils->breadcrumb('Kayıtlar');
@@ -57,6 +55,7 @@ abstract class AdminController extends Controller
             'insertBefore' => 'insertBefore',
             'insertAfter' => 'insertAfter',
             'insertRequest' => 'insertRequest',
+            'redirect' => ['update', '@id']
         ), $methods);
 
 
@@ -76,16 +75,7 @@ abstract class AdminController extends Controller
                     $this->callMethod($methods['insertAfter']);
                     $this->alert->set('success', 'Kayıt eklendi.');
 
-                    if (isset($methods['redirect'])) {
-                        $methods['redirect'] = ! is_array($methods['redirect']) ? array($methods['redirect']) : $methods['redirect'];
-                        $methods['redirect'][] = $success;
-                        $redirect = call_user_func_array('moduleUri', $methods['redirect']);
-                    } else {
-                        $redirect = moduleUri('update', $success);
-                    }
-
-                    $this->makeRedirect($redirect);
-
+                    $this->makeRedirect($methods['redirect'], $success);
                 }
             }
         }
@@ -110,6 +100,7 @@ abstract class AdminController extends Controller
             'updateBefore' => 'updateBefore',
             'updateAfter' => 'updateAfter',
             'updateRequest' => 'updateRequest',
+            'redirect' => ['update', '@id']
         ), $methods);
 
 
@@ -132,15 +123,7 @@ abstract class AdminController extends Controller
                     $this->callMethod($methods['updateAfter'], $record);
                     $this->alert->set('success', 'Kayıt düzenlendi.');
 
-                    if (isset($methods['redirect'])) {
-                        $methods['redirect'] = ! is_array($methods['redirect']) ? array($methods['redirect']) : $methods['redirect'];
-                        $methods['redirect'][] = $record->id;
-                        $redirect = call_user_func_array('moduleUri', $methods['redirect']);
-                    } else {
-                        $redirect = moduleUri('update', $record->id);
-                    }
-
-                    $this->makeRedirect($redirect);
+                    $this->makeRedirect($methods['redirect'], $success);
                 }
 
                 $this->alert->set('warning', 'Kayıt düzenlenmedi.');

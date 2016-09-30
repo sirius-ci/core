@@ -58,8 +58,9 @@ class ModuleAdminController extends AdminController
 
                 if ($success) {
                     $this->alert->set('success', 'Kayıt düzenlendi.');
-                    redirect(moduleUri('update', $record->name));
+                    $this->makeRedirect(['update', $record->name]);
                 }
+
                 $this->alert->set('warning', 'Kayıt düzenlenmedi.');
             }
         }

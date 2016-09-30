@@ -95,7 +95,11 @@ class Home extends AdminModel
                 'password' => md5($this->input->post('password')),
             ));
 
-        return $this->db->affected_rows();
+        if ($this->db->affected_rows()) {
+            return true;
+        }
+
+        return false;
     }
 
 
@@ -143,8 +147,13 @@ class Home extends AdminModel
             'groupId' => $this->input->post('group'),
         ));
 
-        return $this->db->insert_id();
+        $insertId = $this->db->insert_id();
 
+        if ($insertId > 0) {
+            return $this->user($insertId);
+        }
+
+        return false;
     }
 
 
@@ -161,7 +170,11 @@ class Home extends AdminModel
                 'groupId' => $this->input->post('group')
             ));
 
-        return $this->db->affected_rows();
+        if ($this->db->affected_rows() > 0) {
+            return $this->user($record->id);
+        }
+
+        return false;
     }
 
 
@@ -249,8 +262,13 @@ class Home extends AdminModel
             'name' => $this->input->post('name'),
         ));
 
-        return $this->db->insert_id();
+        $insertId = $this->db->insert_id();
 
+        if ($insertId > 0) {
+            return $this->group($insertId);
+        }
+
+        return false;
     }
 
 
@@ -263,7 +281,11 @@ class Home extends AdminModel
                 'name' => $this->input->post('name')
             ));
 
-        return $this->db->affected_rows();
+        if ($this->db->affected_rows() > 0) {
+            return $this->group($record->id);
+        }
+
+        return false;
     }
 
 
