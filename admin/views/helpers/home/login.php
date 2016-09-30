@@ -6,7 +6,7 @@
 
                 <div class="panel-heading">Sisteme Giriş</div>
                 <div class="panel-body">
-                        <?php echo $this->alert->flush('error') ?>
+                        <?php echo $this->alert->flash('error') ?>
 
                         <div class="input-group form-group">
                             <span class="input-group-addon"><i class="fa fa-user"></i></span>

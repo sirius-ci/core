@@ -2,7 +2,7 @@
     <form action="" method="post" enctype="multipart/form-data">
 
         <div class="col-md-6 col-md-offset-3">
-            <?php echo $this->alert->flush(['error', 'success']); ?>
+            <?php echo $this->alert->flash(['error', 'success']); ?>
 
             <div class="panel panel-default">
                 <div class="panel-heading"><i class="fa fa-plus-square"></i> Kayıt Ekle</div>

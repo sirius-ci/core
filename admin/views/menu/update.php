@@ -2,7 +2,7 @@
 <div class="row">
     <form action="" method="post" enctype="multipart/form-data">
         <div class="col-md-8">
-            <?php echo $this->alert->flush(['error', 'success']); ?>
+            <?php echo $this->alert->flash(['error', 'success']); ?>
 
             <div class="panel panel-default">
                 <div class="panel-heading"><i class="fa fa-edit"></i> Kayıt Düzenle</div>

@@ -2,7 +2,7 @@
 
 <div class="row">
     <div class="col-md-6">
-        <?php echo $this->alert->flush(['error', 'success']); ?>
+        <?php echo $this->alert->flash(['error', 'success']); ?>
 
         <form action="" method="post" enctype="multipart/form-data">
             <div class="panel panel-default">
@@ -23,7 +23,7 @@
 
 
     <div class="col-md-6">
-        <?php echo $this->alert->flush(['error', 'success'], 'perms'); ?>
+        <?php echo $this->alert->flash(['error', 'success'], 'perms'); ?>
 
         <form action="<?php echo $this->module ?>/groupPermsUpdate/<?php echo $record->id ?>" method="post" enctype="multipart/form-data">
 

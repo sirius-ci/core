@@ -30,23 +30,29 @@ class Alert
     /**
      * Uyarıyı html olarak döndürür ve uyarıyı temizler.
      *
-     * @param $type
+     * @param array|string $types
      * @param string $suffix
      * @return bool|string
      */
-    function flush($type, $suffix = 'default')
+    function flash($types, $suffix = 'default')
     {
-        $alerts = $this->get($type, $suffix);
+        if (! is_array($types)) {
+            $types = array($types);
+        }
 
-        if ($alerts) {
-            $response = '';
-            $this->clear($type, $suffix);
+        foreach ($types as $type) {
+            $alerts = $this->get($type, $suffix);
 
-            foreach ($alerts as $alert) {
-                $response .= '<p>'. $alert .'</p>';
+            if ($alerts) {
+                $response = '';
+                $this->clear($type, $suffix);
+
+                foreach ($alerts as $alert) {
+                    $response .= '<p>'. $alert .'</p>';
+                }
+
+                return '<div class="alert alert-'. $type .'">'. $response .'</div>';
             }
-
-            return '<div class="alert alert-'. $type .'">'. $response .'</div>';
         }
 
         return false;
