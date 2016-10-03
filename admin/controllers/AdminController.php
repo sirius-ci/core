@@ -35,7 +35,6 @@ abstract class AdminController extends Controller
 
         $this->viewData['records'] = $records;
         $this->viewData['paginate'] = $paginate;
-
     }
 
 
@@ -60,22 +59,22 @@ abstract class AdminController extends Controller
 
 
         if ($this->input->post()) {
-            $this->callMethod($methods['validation'], 'insert');
+            $this->callMethod($methods['validation'], ['insert']);
 
             if (! $this->alert->has('error')) {
-                $this->callMethod($methods['validationAfter'], 'insert');
+                $this->callMethod($methods['validationAfter'], ['insert']);
             }
 
             if (! $this->alert->has('error')) {
                 $this->callMethod($methods['insertBefore']);
 
-                $success = $this->callMethod($methods['insert'], $this->modelData);
+                $success = $this->callMethod($methods['insert'], [$this->modelData]);
 
                 if ($success) {
                     $this->callMethod($methods['insertAfter']);
                     $this->alert->set('success', 'Kayıt eklendi.');
 
-                    $this->makeRedirect($methods['redirect'], $success);
+                    $this->makeRedirect($methods['redirect'], [$success]);
                 }
             }
         }
@@ -116,21 +115,21 @@ abstract class AdminController extends Controller
             }
 
             if (! $this->alert->has('error')) {
-                $this->callMethod($methods['updateBefore'], $record);
+                $this->callMethod($methods['updateBefore'], [$record]);
                 $success = $this->callMethod($methods['update'], [$record, $this->modelData]);
 
                 if ($success) {
-                    $this->callMethod($methods['updateAfter'], $record);
+                    $this->callMethod($methods['updateAfter'], [$record]);
                     $this->alert->set('success', 'Kayıt düzenlendi.');
 
-                    $this->makeRedirect($methods['redirect'], $success);
+                    $this->makeRedirect($methods['redirect'], [$success]);
                 }
 
                 $this->alert->set('warning', 'Kayıt düzenlenmedi.');
             }
         }
 
-        $this->callMethod($methods['updateRequest'], $record);
+        $this->callMethod($methods['updateRequest'], [$record]);
         $this->utils->breadcrumb('Kayıt Düzenle');
 
         $this->viewData['record'] = $record;
@@ -177,7 +176,7 @@ abstract class AdminController extends Controller
             show_404();
         }
 
-        $success = $this->callMethod($methods['delete'], $record);
+        $success = $this->callMethod($methods['delete'], [$record]);
 
         if ($success) {
             $this->alert->set('success', "Kayıt kaldırıldı. (#{$record->id})");

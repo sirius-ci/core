@@ -166,16 +166,16 @@ class HomeAdminController extends AdminController
 
     /**
      * Kullanıcı doğrulaması.
-     * @param string $type Validasyon türü (insert|update)
+     * @param string $action Validasyon türü (insert|update)
      */
-    public function userValidation($type)
+    public function userValidation($action)
     {
         $rules = [
             'username' => array('required', 'Lüfen kullanıcı adı yazın.'),
             'group' => array('required|numeric', 'Lütfen kullanıcı grubu seçin.'),
         ];
 
-        if ($type === 'insert') {
+        if ($action === 'insert') {
             $rules['password'] = array('required', 'Lüfen parola yazın.');
         }
 
