@@ -173,7 +173,14 @@ class InstallController extends CI_Controller
 
                     // Aktif pattern'de @uri parametresi varsa uri değerini replace et.
                     if (isset($this->provider->routes[$language]['uri'])) {
-                        $pattern = str_replace('@uri', $this->provider->routes[$language]['uri'], $pattern);
+                        if (! is_array($this->provider->routes[$language]['uri'])) {
+                            $this->provider->routes[$language]['uri'] = ['uri' => $this->provider->routes[$language]['uri']];
+                        }
+
+                        foreach ($this->provider->routes[$language]['uri'] as $key => $uri) {
+                            $pattern = str_replace("@$key", $uri, $pattern);
+                        }
+
                     }
 
                     if (! empty($pattern)) {
