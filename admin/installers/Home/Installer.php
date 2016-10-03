@@ -6,6 +6,11 @@ use Sirius\Admin\Installer as InstallManager;
 class Installer extends InstallManager
 {
 
+    /**
+     * Tabloların varlığı kontrol edilmesi için konulabilir.
+     *
+     * @var array
+     */
     public $tables = array(
         'admin_groups',
         'admin_perms',
@@ -16,14 +21,47 @@ class Installer extends InstallManager
         'options',
     );
 
+    /**
+     * Rotasyon tanımlamaları.
+     *
+     * @var array
+     */
     public $routes = array(
-        'tr' => array(
+        // Türkçe
+        'tr' => array(),
+        // İngilizce
+        'en' => array(
+            'route' => array('' => 'HomeController/index'),
             'uri' => './'
         ),
-        'en' => array(
-            'route' => array(
-                '' => 'HomeController/index',
-            ),
+        // Almanca
+        'de' => array(
+            'route' => array('' => 'HomeController/index'),
+            'uri' => './'
+        ),
+        // Fransızca
+        'fr' => array(
+            'route' => array('' => 'HomeController/index'),
+            'uri' => './'
+        ),
+        // Rusça
+        'ru' => array(
+            'route' => array('' => 'HomeController/index'),
+            'uri' => './'
+        ),
+        // İtalyanca
+        'it' => array(
+            'route' => array('' => 'HomeController/index'),
+            'uri' => './'
+        ),
+        // İspanyolca
+        'es' => array(
+            'route' => array('' => 'HomeController/index'),
+            'uri' => './'
+        ),
+        // Arapça
+        'ar' => array(
+            'route' => array('' => 'HomeController/index'),
             'uri' => './'
         ),
     );
@@ -32,10 +70,9 @@ class Installer extends InstallManager
     public function insertData()
     {
         $languages = $this->config->item('languages');
-        $insert = array();
 
         foreach ($languages as $language => $label) {
-            $data = array(
+            $insert = array(
                 array(
                     'name' => 'metaTitle',
                     'title' => 'Site Başlığı',
@@ -102,8 +139,6 @@ class Installer extends InstallManager
                 ),
             );
 
-
-            $insert = array_merge($insert, $data);
         }
 
         $this->db->insert_batch('options', $insert);

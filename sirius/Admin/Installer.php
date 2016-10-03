@@ -5,9 +5,6 @@ namespace Sirius\Admin;
 
 abstract class Installer
 {
-    public $steps = array(
-        'insertData'
-    );
 
     public function __get($key)
     {
