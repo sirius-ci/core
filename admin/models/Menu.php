@@ -4,6 +4,10 @@ use Admin\Models\AdminModel;
 
 class Menu extends AdminModel
 {
+    /**
+     * Değişken modelde tanımlanacak.
+     * @var string
+     */
     protected $table = 'menus';
 
     public function find($id)
