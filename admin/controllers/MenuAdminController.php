@@ -27,14 +27,22 @@ class MenuAdminController extends AdminController
         'groupDelete' => 'list',
     );
 
-
+    /**
+     * Menü grupları listeleme
+     *
+     * @success
+     */
     public function records()
     {
         parent::records();
         $this->render('records');
     }
 
-
+    /**
+     * Menü ekleme.
+     *
+     * @success
+     */
     public function insert()
     {
         $response = array('success' => false, 'html' => 'Kayıt bulunamadı.');
@@ -62,10 +70,16 @@ class MenuAdminController extends AdminController
         $this->json($response);
     }
 
-
+    /**
+     * Menü güncelleme
+     *
+     * @success
+     */
     public function update()
     {
-        parent::update();
+        parent::update([
+            'validation' => 'updateValidation'
+        ]);
         $this->render('update');
     }
 
@@ -75,43 +89,58 @@ class MenuAdminController extends AdminController
         $this->setParentsBread($record);
     }
 
-
-    public function validation($action)
+    /**
+     * Menü güncelleme validasyonu.
+     *
+     * @param $action
+     * @success
+     */
+    public function updateValidation($action)
     {
-        if ($action === 'update') {
-            $this->validate([
-                'title' => ['required', 'Lütfen Başlık yazınız.'],
-                'hint' => ['required', 'Lütfen Alt Başlık yazınız.'],
-                'link' => ['required', 'Lütfen Link yazınız.'],
-            ]);
-        }
+        $this->validate([
+            'title' => ['required', 'Lütfen Başlık yazınız.'],
+            'hint' => ['required', 'Lütfen Alt Başlık yazınız.'],
+            'link' => ['required', 'Lütfen Link yazınız.'],
+        ]);
+
     }
 
-
+    /**
+     * Menü Silme
+     *
+     * @success
+     */
     public function delete()
     {
         parent::delete();
     }
 
-
+    /**
+     * Menü sıralama
+     *
+     * @success
+     */
     public function order()
     {
         parent::order();
     }
 
-
+    /**
+     * Menü alt kayıtlar
+     */
     public function childs()
     {
         if (! $parent = $this->appmodel->find($this->uri->segment(3))) {
             show_404();
         }
 
+        $this->setParentsBread($parent);
+
         parent::records([
             'count' => [$this->appmodel, 'childCount', $parent],
             'all' => [$this->appmodel, 'childAll', $parent]
         ]);
 
-        $this->setParentsBread($parent);
         $this->viewData['modules'] = $this->appmodel->moduleAll();
         $this->viewData['parent'] = $parent;
         $this->assets->js('../public/admin/js/module/menu.js');
@@ -128,7 +157,9 @@ class MenuAdminController extends AdminController
         }
     }
 
-
+    /**
+     * Modül listesi
+     */
     public function module()
     {
         $response = array('success' => false, 'html' => 'Kayıt bulunamadı.');
@@ -144,7 +175,11 @@ class MenuAdminController extends AdminController
         $this->json($response);
     }
 
-
+    /**
+     * Menü grubu validasyonu
+     *
+     * @param $action
+     */
     public function groupValidation($action)
     {
         $this->validate([
@@ -153,7 +188,11 @@ class MenuAdminController extends AdminController
         ]);
     }
 
-
+    /**
+     * Menü grubu ekleme
+     *
+     * @success
+     */
     public function groupInsert()
     {
         if (! $this->isRoot()) {
@@ -169,8 +208,11 @@ class MenuAdminController extends AdminController
         $this->render('group/insert');
     }
 
-
-
+    /**
+     * Menü grubu düzenleme
+     *
+     * @success
+     */
     public function groupUpdate()
     {
         if (! $this->isRoot()) {
@@ -187,8 +229,11 @@ class MenuAdminController extends AdminController
         $this->render('group/update');
     }
 
-
-
+    /**
+     * Menü grubu silme
+     *
+     * @success
+     */
     public function groupDelete()
     {
         if (! $this->isRoot()) {
@@ -200,7 +245,7 @@ class MenuAdminController extends AdminController
         }
 
         parent::delete([
-            'delete' => 'groupDelete'
+            'delete' => [$this->appmodel, 'groupDelete']
         ]);
 
     }

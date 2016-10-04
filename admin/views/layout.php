@@ -108,7 +108,7 @@ $exceptModules = array('home', 'module');
         <div class="clearfix">
             <div class="pull-left">
                 <ul class="breadcrumb">
-                    <?php foreach ($this->breadcrumb as $bread): ?>
+                    <?php foreach ($this->utils->breadcrumbs() as $bread): ?>
                         <li>
                             <?php if (!empty($bread['url'])): ?>
                                 <a href="<?php echo $bread['url'] ?>"><?php echo $bread['title'] ?></a>

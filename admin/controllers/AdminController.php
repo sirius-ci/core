@@ -74,7 +74,7 @@ abstract class AdminController extends Controller
                     $this->callMethod($methods['insertAfter']);
                     $this->alert->set('success', 'Kayıt eklendi.');
 
-                    $this->makeRedirect($methods['redirect'], [$success]);
+                    $this->makeRedirect($methods['redirect'], $success);
                 }
             }
         }
@@ -122,7 +122,7 @@ abstract class AdminController extends Controller
                     $this->callMethod($methods['updateAfter'], [$record]);
                     $this->alert->set('success', 'Kayıt düzenlendi.');
 
-                    $this->makeRedirect($methods['redirect'], [$success]);
+                    $this->makeRedirect($methods['redirect'], $success);
                 }
 
                 $this->alert->set('warning', 'Kayıt düzenlenmedi.');
