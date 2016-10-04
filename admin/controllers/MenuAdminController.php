@@ -7,6 +7,7 @@ class MenuAdminController extends AdminController
     public $moduleTitle = 'Menü Yönetimi';
     public $module = 'menu';
     public $model = 'menu';
+    public $icon = 'fa-list-ul';
 
 
     // Arama yapılacak kolonlar.

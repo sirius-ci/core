@@ -4,6 +4,7 @@ class InstallController extends CI_Controller
 {
 
     public $module;
+    private $moduleData;
 
     protected $provider;
     protected $messages = array();
@@ -31,9 +32,8 @@ class InstallController extends CI_Controller
         $this->provider = new Installer();
 
         if (! $this->isInstalled()) {
-
-
             $sqlString = '';
+
             if (file_exists(APPPATH .'/installers/'. ucfirst($module) .'/Database.sql')) {
                 $sqlString = $this->load->file(APPPATH .'/installers/'. ucfirst($module) .'/Database.sql', true);
             }
@@ -73,11 +73,7 @@ class InstallController extends CI_Controller
             return false;
         }
 
-        $module = $this->db
-            ->from('modules')
-            ->where('name', $this->module)
-            ->get()
-            ->row();
+        $module = $this->getModule();
 
         if ($module) {
             $this->messages[] = 'Modül kurulumu yapılmış.';
@@ -120,6 +116,20 @@ class InstallController extends CI_Controller
         ));
 
         $this->messages[] = 'Modül kuruldu.';
+    }
+
+
+    private function getModule()
+    {
+        if (empty($this->moduleData)) {
+            $this->moduleData = $this->db
+                ->from('modules')
+                ->where('name', $this->module)
+                ->get()
+                ->row();
+        }
+
+        return $this->moduleData;
     }
 
 

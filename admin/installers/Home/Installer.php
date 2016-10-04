@@ -144,4 +144,22 @@ class Installer extends InstallManager
         $this->db->insert_batch('options', $insert);
     }
 
+
+    /**
+     * Menü modülünü kayıt eder.
+     */
+    public function saveMenuModule()
+    {
+        $this->db->insert('modules', array(
+            'title' => 'Menü Yönetimi',
+            'name' => 'menu',
+            'modified' => 0,
+            'permissions' => '',
+            'type' =>  null,
+            'icon' =>  null,
+            'menuPattern' => null,
+            'controller' => ''
+        ));
+    }
+
 }
