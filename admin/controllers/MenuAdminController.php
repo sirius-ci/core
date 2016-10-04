@@ -76,13 +76,15 @@ class MenuAdminController extends AdminController
     }
 
 
-    public function updateValidation()
+    public function validation($action)
     {
-        $this->validate([
-            'title' => ['required', 'Lütfen Başlık yazınız.'],
-            'hint' => ['required', 'Lütfen Alt Başlık yazınız.'],
-            'link' => ['required', 'Lütfen Link yazınız.'],
-        ]);
+        if ($action === 'update') {
+            $this->validate([
+                'title' => ['required', 'Lütfen Başlık yazınız.'],
+                'hint' => ['required', 'Lütfen Alt Başlık yazınız.'],
+                'link' => ['required', 'Lütfen Link yazınız.'],
+            ]);
+        }
     }
 
 
@@ -104,25 +106,15 @@ class MenuAdminController extends AdminController
             show_404();
         }
 
-        $records = array();
-        $paginate = null;
-        $recordCount = $this->appmodel->childCount();
-
-        if ($recordCount > 0) {
-            $paginate = $this->paginateForOrder($recordCount);
-            $records = $this->appmodel->all($paginate);
-        }
+        parent::records([
+            'count' => [$this->appmodel, 'childCount', $parent],
+            'all' => [$this->appmodel, 'childAll', $parent]
+        ]);
 
         $this->setParentsBread($parent);
-
-        $this->utils->breadcrumb('Kayıtlar');
-
-        $this->viewData['parent'] = $parent;
         $this->viewData['modules'] = $this->appmodel->moduleAll();
-        $this->viewData['records'] = $records;
-        $this->viewData['paginate'] = $paginate;
-
-        $this->assets->js('public/admin/js/module/menu.js');
+        $this->viewData['parent'] = $parent;
+        $this->assets->js('../public/admin/js/module/menu.js');
         $this->render('childs');
     }
 
@@ -144,7 +136,7 @@ class MenuAdminController extends AdminController
 
         if ($module) {
             $response['success'] = true;
-            $response['html'] = $this->load->view(clink(array($this->module, 'links')), array(
+            $response['html'] = $this->load->view("{$this->module}/links", array(
                 'records' => $this->appmodel->moduleLinks($module)
             ), true);
         }
@@ -153,7 +145,7 @@ class MenuAdminController extends AdminController
     }
 
 
-    private function groupValidation()
+    public function groupValidation($action)
     {
         $this->validate([
             'name' => array('required', 'Lütfen etiket yazınız.'),
@@ -168,20 +160,12 @@ class MenuAdminController extends AdminController
             redirect('home/denied');
         }
 
-        if ($this->input->post()) {
-            $this->groupValidation();
+        parent::insert([
+            'insert' => [$this->appmodel, 'groupInsert'],
+            'validation' => 'groupValidation',
+            'redirect' => ['childs', '@id']
+        ]);
 
-            if (! $this->alert->has('error')) {
-                $success = $this->appmodel->groupInsert($this->modelData);
-
-                if ($success) {
-                    $this->alert->set('success', 'Kayıt eklendi.');
-                    $this->makeRedirect(moduleUri('groupUpdate', $success));
-                }
-            }
-        }
-
-        $this->utils->breadcrumb('Yeni Menü Grubu Ekle');
         $this->render('group/insert');
     }
 
@@ -193,27 +177,13 @@ class MenuAdminController extends AdminController
             redirect('home/denied');
         }
 
-        if (! $record = $this->appmodel->find($this->uri->segment(3))) {
-            show_404();
-        }
+        parent::update([
+            'update' => [$this->appmodel, 'groupUpdate'],
+            'find' => [$this->appmodel, 'find'],
+            'validation' => 'groupValidation',
+            'redirect' => ['groupUpdate', '@id']
+        ]);
 
-        if ($this->input->post()) {
-            $this->groupValidation();
-
-            if (! $this->alert->has('error')) {
-                $success = $this->appmodel->groupUpdate($record, $this->modelData);
-
-                if ($success) {
-                    $this->alert->set('success', 'Kayıt düzenlendi.');
-                    $this->makeRedirect(moduleUri('groupUpdate', $record->id));
-                }
-
-                $this->alert->set('warning', 'Kayıt düzenlenmedi.');
-            }
-        }
-
-        $this->utils->breadcrumb('Menü Grubu Düzenle');
-        $this->viewData['record'] = $record;
         $this->render('group/update');
     }
 
@@ -229,7 +199,9 @@ class MenuAdminController extends AdminController
             }
         }
 
-        parent::delete(array('delete' => 'groupDelete'));
+        parent::delete([
+            'delete' => 'groupDelete'
+        ]);
 
     }
 

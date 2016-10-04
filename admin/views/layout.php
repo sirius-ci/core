@@ -11,11 +11,10 @@
     <link rel="stylesheet" type="text/css" href="../public/admin/plugin/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="../public/admin/plugin/fancybox/jquery.fancybox.css" />
     <link rel="stylesheet" type="text/css" href="../public/admin/css/main.css" />
-    <?php if (isset($public['css'])): ?>
-        <?php foreach ($public['css'] as $css): ?>
-            <link rel="stylesheet" type="text/css" href="<?php echo $css ?>" />
-        <?php endforeach; ?>
-    <?php endif; ?>
+
+    <?php foreach ($this->assets->css() as $css): ?>
+        <link rel="stylesheet" type="text/css" href="<?php echo $css ?>" />
+    <?php endforeach; ?>
 
     <script type="text/javascript" src="../public/admin/js/jquery.js"></script>
     <script type="text/javascript" src="../public/admin/js/jquery-ui.min.js"></script>
@@ -23,15 +22,13 @@
     <script type="text/javascript" src="../public/admin/plugin/fancybox/jquery.fancybox.js"></script>
     <script type="text/javascript" src="../public/admin/js/bootstrap.filestyle.min.js"></script>
     <script type="text/javascript" src="../public/admin/js/jquery.maskMoney.min.js"></script>
-    <?php if (isset($public['js'])): ?>
-        <?php foreach ($public['js'] as $js): ?>
-            <script type="text/javascript" src="<?php echo $js ?>"></script>
-        <?php endforeach; ?>
-    <?php endif; ?>
+
+    <?php foreach ($this->assets->js() as $js): ?>
+        <script type="text/javascript" src="<?php echo $js ?>"></script>
+    <?php endforeach; ?>
+
     <script type="text/javascript" src="../public/admin/js/main.js"></script>
 
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements html5shiv.js -->
-    <!--[if lt IE 9]><script src="../public/admin/js/html5shiv.js'"></script><![endif]-->
 </head>
 <body>
 <header id="header">

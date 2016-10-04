@@ -4,7 +4,7 @@ use Admin\Models\AdminModel;
 
 class Menu extends AdminModel
 {
-    private $table = 'menus';
+    protected $table = 'menus';
 
     public function find($id)
     {
@@ -174,9 +174,13 @@ class Menu extends AdminModel
             'language' => $this->language,
         ));
 
+        $insertId = $this->db->insert_id();
 
+        if ($insertId > 0) {
+            return $this->find($insertId);
+        }
 
-        return $this->db->insert_id();
+        return false;
     }
 
 
@@ -193,8 +197,11 @@ class Menu extends AdminModel
                 'target' => $this->input->post('target'),
             ));
 
+        if ($this->db->affected_rows() > 0) {
+            return $this->find($record->id);
+        }
 
-        return $this->db->affected_rows();
+        return false;
     }
 
 
@@ -236,8 +243,13 @@ class Menu extends AdminModel
             'language' => $this->language,
         ));
 
+        $insertId = $this->db->insert_id();
 
-        return $this->db->insert_id();
+        if ($insertId > 0) {
+            return $this->find($insertId);
+        }
+
+        return false;
     }
 
 
@@ -250,7 +262,11 @@ class Menu extends AdminModel
                 'title' => $this->input->post('title')
             ));
 
-        return $this->db->affected_rows();
+        if ($this->db->affected_rows() > 0) {
+            return $this->find($record->id);
+        }
+
+        return false;
     }
 
 
