@@ -22,7 +22,7 @@ class Module extends AdminModel
     }
 
 
-    public function id($id)
+    public function find($id)
     {
         $record = $this->db
             ->from($this->table)
@@ -37,18 +37,15 @@ class Module extends AdminModel
     }
 
 
-    public function all($limit = null, $offset = null)
+    public function all($paginate = [])
     {
         $this->setFilter();
-
-
-        if ($limit != null) {
-            $this->db->limit($limit, $offset);
-        }
+        $this->setPaginate($paginate);
 
         $records = $this->db
             ->select("{$this->table}.*, (SELECT COUNT(id) FROM module_arguments WHERE module_arguments.module = {$this->table}.name AND module_arguments.language = '{$this->language}') arguments", false)
             ->from($this->table)
+            ->order_by('order', 'asc')
             ->order_by('id', 'asc')
             ->get()
             ->result();
@@ -111,6 +108,16 @@ class Module extends AdminModel
         }
 
         return $results;
+    }
+
+    public function delete($data)
+    {
+        return parent::delete($this->table, $data);
+    }
+
+    public function order($ids)
+    {
+        return parent::order($this->table, $ids);
     }
 
 

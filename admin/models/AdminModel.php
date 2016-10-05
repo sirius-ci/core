@@ -15,7 +15,7 @@ class AdminModel extends Model
      * @param bool|false $returnRecords İşlem başarılı olduğunda kayıtları döndür.
      * @return array|bool
      */
-    public function delete($table, $data, $returnRecords = false)
+    protected function delete($table, $data, $returnRecords = false)
     {
         if (! is_array($data) && ! is_object($data)) {
             return false;
