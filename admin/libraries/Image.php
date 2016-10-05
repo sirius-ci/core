@@ -5,8 +5,8 @@ class Image
 {
     private $uploadInput = 'imageFile';
     private $downloadInput = 'imageUrl';
-    private $tempPath = 'public/upload/temp/';
-    private $uploadPath = 'public/upload/';
+    private $tempPath = '../public/upload/temp/';
+    private $uploadPath = '../public/upload/';
     private $defaultImage = null;
     private $minWidth = 0;
     private $minHeight = 0;
