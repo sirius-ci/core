@@ -20,6 +20,7 @@
 
                 <div class="panel-footer">
                     <button class="btn btn-success" type="submit">Gönder</button>
+                    <a class="btn btn-default" href="<?php echo moduleUri('users') ?>">Vazgeç</a>
                 </div>
 
             </div>

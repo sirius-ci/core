@@ -8,18 +8,16 @@
             <div class="col-md-4">
                 <?php if ($this->permission('delete')): ?>
                     <a class="btn btn-sm btn-info checkall" data-toggle="button"><i class="fa fa-check-square-o"></i> Hepsini Seç</a>
-                    <a class="btn btn-sm btn-danger deleteall" href="<?php echo $this->module ?>/delete"><i class="fa fa-trash-o"></i></a>
+                    <a class="btn btn-sm btn-danger deleteall" href="<?php echo moduleUri('delete') ?>"><i class="fa fa-trash-o"></i></a>
                 <?php endif; ?>
                 <?php if ($this->permission('insert')): ?>
-                    <a id="modal-modules-button" class="btn btn-sm btn-success" href="<?php echo $this->module ?>/insert/<?php echo $parent->id ?>"><i class="fa fa-plus"></i> Yeni Kayıt</a>
+                    <a id="modal-modules-button" class="btn btn-sm btn-success" href="<?php echo moduleUri('insert', $parent->id) ?>"><i class="fa fa-plus"></i> Yeni Kayıt</a>
                 <?php endif; ?>
 
-                <a id="order-update" class="btn btn-sm btn-info hide" href="<?php echo $this->module ?>/order"><i class="fa fa-check-square"></i> Sırayı Güncelle</a>
+                <a id="order-update" class="btn btn-sm btn-info hide" href="<?php echo moduleUri('order') ?>"><i class="fa fa-check-square"></i> Sırayı Güncelle</a>
             </div>
             <div class="col-md-8 text-right">
-                <form class="form-inline" action="" method="get" id="filter" accept-charset="utf-8" style="display: inline-block;">
-                    <?php $this->view('filter') ?>
-                </form>
+                <?php $this->view('filter') ?>
             </div>
         </div>
     </div>
@@ -43,7 +41,7 @@
                 <td><?php echo $item->id ?></td>
                 <td><?php echo $item->title ?></td>
                 <td><?php echo $item->link ?></td>
-                <td class="text-center"><a class="btn btn-success btn-xs" href="<?php echo $this->module ?>/childs/<?php echo $item->id ?>"><i class="fa fa-link"></i> <?php echo $item->childs ?></a></td>
+                <td class="text-center"><a class="btn btn-success btn-xs" href="<?php echo moduleUri('childs', $item->id) ?>"><i class="fa fa-link"></i> <?php echo $item->childs ?></a></td>
                 <td class="text-center">
                     <div class="btn-group">
                         <a class="btn btn-xs btn-info disabled"><?php echo $item->order ?></a>
@@ -54,10 +52,10 @@
                 </td>
                 <td class="text-right">
                     <?php if ($this->permission('update')): ?>
-                        <a class="btn btn-xs btn-primary" href="<?php echo $this->module ?>/update/<?php echo $item->id ?>"><i class="fa fa-edit"></i></a>
+                        <a class="btn btn-xs btn-primary" href="<?php echo moduleUri('update', $item->id) ?>"><i class="fa fa-edit"></i></a>
                     <?php endif; ?>
                     <?php if ($this->permission('delete')): ?>
-                        <a class="btn btn-xs btn-danger confirm-delete" href="<?php echo $this->module ?>/delete/<?php echo $item->id ?>"><i class="fa fa-trash-o"></i></a>
+                        <a class="btn btn-xs btn-danger confirm-delete" href="<?php echo moduleUri('delete', $item->id) ?>"><i class="fa fa-trash-o"></i></a>
                     <?php endif; ?>
                 </td>
             </tr>
@@ -86,7 +84,7 @@
                         <ul class="nav nav-pills nav-stacked">
                             <li><a href="#static" data-toggle="tab" data-url="<?php echo $this->module ?>/static">Sabitler</a></li>
                             <?php foreach ($modules as $module): ?>
-                                <li><a href="#<?php echo $module->name ?>" data-toggle="tab" data-url="<?php echo $this->module ?>/module/<?php echo $module->name ?>"><?php echo $module->title ?></a></li>
+                                <li><a href="#<?php echo $module->name ?>" data-toggle="tab" data-url="<?php echo moduleUri('module', $module->name) ?>"><?php echo $module->title ?></a></li>
                             <?php endforeach; ?>
                         </ul>
                     </div>

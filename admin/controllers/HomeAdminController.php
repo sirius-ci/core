@@ -291,9 +291,9 @@ class HomeAdminController extends AdminController
         $success = $this->appmodel->groupPermsUpdate($record);
 
         if ($success) {
-            $this->alert->set('success', 'Yetkiler düzenlendi.');
+            $this->alert->set('success', 'Yetkiler düzenlendi.', 'perms');
         } else {
-            $this->alert->set('warning', 'Yetkilerde değişiklik olmadı.');
+            $this->alert->set('warning', 'Yetkilerde değişiklik olmadı.', 'perms');
         }
 
         redirect(moduleUri('groupUpdate', $record->id));

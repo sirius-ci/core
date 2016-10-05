@@ -8,14 +8,11 @@
             <div class="col-md-4">
                 <?php if ($this->isRoot()): ?>
                     <a class="btn btn-sm btn-info checkall" data-toggle="button"><i class="fa fa-check-square-o"></i> Hepsini Seç</a>
-                    <a class="btn btn-sm btn-danger deleteall" href="<?php echo $this->module ?>/groupDelete"><i class="fa fa-trash-o"></i></a>
-                    <a id="modal-modules-button" class="btn btn-sm btn-success" href="<?php echo $this->module ?>/groupInsert"><i class="fa fa-plus"></i> Yeni Kayıt</a>
+                    <a class="btn btn-sm btn-danger deleteall" href="<?php echo moduleUri('groupDelete') ?>"><i class="fa fa-trash-o"></i></a>
+                    <a id="modal-modules-button" class="btn btn-sm btn-success" href="<?php echo moduleUri('groupInsert') ?>"><i class="fa fa-plus"></i> Yeni Kayıt</a>
                 <?php endif; ?>
-
             </div>
-
             <div class="col-md-8 text-right">
-                <form class="form-inline" action="" method="get" id="filter" accept-charset="utf-8" style="display: inline-block;">
                     <?php $this->view('filter') ?>
                 </form>
             </div>
@@ -39,12 +36,12 @@
             <td><?php echo $item->title ?></td>
             <td class="text-center"><?php echo $item->childs ?></td>
             <td class="text-right">
-                <a class="btn btn-xs btn-success" href="<?php echo $this->module ?>/childs/<?php echo $item->id ?>"><i class="fa fa-share-alt"></i></a>
+                <a class="btn btn-xs btn-success" href="<?php echo moduleUri('childs', $item->id) ?>"><i class="fa fa-share-alt"></i></a>
                 <?php if ($this->isRoot()): ?>
-                    <a class="btn btn-xs btn-primary" href="<?php echo $this->module ?>/groupUpdate/<?php echo $item->id ?>"><i class="fa fa-edit"></i></a>
+                    <a class="btn btn-xs btn-primary" href="<?php echo moduleUri('groupUpdate', $item->id) ?>"><i class="fa fa-edit"></i></a>
                 <?php endif; ?>
                 <?php if ($this->isRoot()): ?>
-                    <a class="btn btn-xs btn-danger confirm-delete" href="<?php echo $this->module ?>/groupDelete/<?php echo $item->id ?>"><i class="fa fa-trash-o"></i></a>
+                    <a class="btn btn-xs btn-danger confirm-delete" href="<?php echo moduleUri('groupDelete', $item->id) ?>"><i class="fa fa-trash-o"></i></a>
                 <?php endif; ?>
             </td>
 

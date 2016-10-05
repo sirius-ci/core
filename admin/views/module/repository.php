@@ -24,7 +24,7 @@
                 <td><?php echo $item->name ?> Modülü</td>
                 <td class="text-right">
                     <?php if ($this->isRoot()): ?>
-                        <a class="btn btn-xs btn-success" data-toggle="tooltip" data-placement="top" title="Yükle" href="<?php echo $this->module ?>/init/<?php echo $item->id ?>"><i class="fa fa-cloud-upload"></i></a>
+                        <a class="btn btn-xs btn-success" data-toggle="tooltip" data-placement="top" title="Yükle" href="<?php echo moduleUri('init', $item->id) ?>"><i class="fa fa-cloud-upload"></i></a>
                     <?php endif; ?>
                 </td>
             </tr>

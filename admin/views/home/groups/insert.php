@@ -14,6 +14,7 @@
 
                 <div class="panel-footer">
                     <button class="btn btn-success" type="submit">Gönder</button>
+                    <a class="btn btn-default" href="<?php echo moduleUri('groups') ?>">Vazgeç</a>
                 </div>
 
             </div>

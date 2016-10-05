@@ -2,30 +2,9 @@
 
 <div class="row">
     <div class="col-md-6">
-        <?php echo $this->alert->flash(['error', 'success']); ?>
-
-        <form action="" method="post" enctype="multipart/form-data">
-            <div class="panel panel-default">
-                <div class="panel-heading"><i class="fa fa-edit"></i> Kayıt Düzenle</div>
-                <div class="panel-body">
-                    <?php echo bsFormText('name', 'Grup Adı', array('required' => true, 'value' => $record->name)) ?>
-                </div>
-
-                <div class="panel-footer">
-                    <button class="btn btn-success" type="submit">Gönder</button>
-                </div>
-
-            </div>
-        </form>
-    </div>
-
-
-
-
-    <div class="col-md-6">
         <?php echo $this->alert->flash(['error', 'success'], 'perms'); ?>
 
-        <form action="<?php echo $this->module ?>/groupPermsUpdate/<?php echo $record->id ?>" method="post" enctype="multipart/form-data">
+        <form action="<?php echo moduleUri('groupPermsUpdate', $record->id) ?>" method="post" enctype="multipart/form-data">
 
 
             <div class="panel panel-default">
@@ -58,11 +37,37 @@
 
                 <div class="panel-footer">
                     <button class="btn btn-success" type="submit">Gönder</button>
+                    <a class="btn btn-default" href="<?php echo moduleUri('groups') ?>">Vazgeç</a>
                 </div>
 
             </div>
         </form>
     </div>
+
+
+    <div class="col-md-6">
+        <?php echo $this->alert->flash(['error', 'success']); ?>
+
+        <form action="" method="post" enctype="multipart/form-data">
+            <div class="panel panel-default">
+                <div class="panel-heading"><i class="fa fa-edit"></i> Kayıt Düzenle</div>
+                <div class="panel-body">
+                    <?php echo bsFormText('name', 'Grup Adı', array('required' => true, 'value' => $record->name)) ?>
+                </div>
+
+                <div class="panel-footer">
+                    <button class="btn btn-success" type="submit">Gönder</button>
+                    <a class="btn btn-default" href="<?php echo moduleUri('groups') ?>">Vazgeç</a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+
+
+
+
 
 
 </div>

@@ -15,7 +15,7 @@
                 </div>
                 <div class="panel-footer">
                     <button class="btn btn-success" type="submit">Kaydet</button>
-                    <a class="btn btn-default" href="<?php echo $this->module ?>/records">Vazgeç</a>
+                    <a class="btn btn-default" href="<?php echo moduleUri('records') ?>">Vazgeç</a>
                 </div>
             </div>
         </div>
