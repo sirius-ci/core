@@ -12,14 +12,18 @@ abstract class AdminController extends Controller
      * Tüm kayıtları sayfalama yaparak listeler.
      *
      * @param array $methods
+     * @param bool|false $ignoreDefaults Varsayılan metodları kullanma
      */
-    protected function records($methods = array())
+    protected function records($methods = array(), $ignoreDefaults = false)
     {
-        $methods = array_merge(array(
-            'count' => [$this->appmodel, 'count'],
-            'all' => [$this->appmodel, 'all'],
-            'recordsRequest' => 'recordsRequest',
-        ), $methods);
+        if ($ignoreDefaults !== true) {
+            $methods = array_merge(array(
+                'count' => [$this->appmodel, 'count'],
+                'all' => [$this->appmodel, 'all'],
+                'recordsRequest' => 'recordsRequest',
+            ), $methods);
+        }
+
 
         $records = array();
         $paginate = null;
@@ -44,19 +48,21 @@ abstract class AdminController extends Controller
      * Yeni kayıt ekleme
      *
      * @param array $methods
+     * @param bool|false $ignoreDefaults Varsayılan metodları kullanma
      */
-    protected function insert($methods = array())
+    protected function insert($methods = array(), $ignoreDefaults = false)
     {
-        $methods = array_merge(array(
-            'insert' => [$this->appmodel, 'insert'],
-            'validation' => 'validation',
-            'validationAfter' => 'validationAfter',
-            'insertBefore' => 'insertBefore',
-            'insertAfter' => 'insertAfter',
-            'insertRequest' => 'insertRequest',
-            'redirect' => ['update', '@id']
-        ), $methods);
-
+        if ($ignoreDefaults !== true) {
+            $methods = array_merge(array(
+                'insert' => [$this->appmodel, 'insert'],
+                'validation' => 'validation',
+                'validationAfter' => 'validationAfter',
+                'insertBefore' => 'insertBefore',
+                'insertAfter' => 'insertAfter',
+                'insertRequest' => 'insertRequest',
+                'redirect' => ['update', '@id']
+            ), $methods);
+        }
 
         if ($this->input->post()) {
             $this->callMethod($methods['validation'], ['insert']);
@@ -88,20 +94,22 @@ abstract class AdminController extends Controller
      * Kayıt güncelleme
      *
      * @param array $methods
+     * @param bool|false $ignoreDefaults Varsayılan metodları kullanma
      */
-    protected function update($methods = array())
+    protected function update($methods = array(), $ignoreDefaults = false)
     {
-        $methods = array_merge(array(
-            'update' => [$this->appmodel, 'update'],
-            'find' => [$this->appmodel, 'find'],
-            'validation' => 'validation',
-            'validationAfter' =>'validationAfter',
-            'updateBefore' => 'updateBefore',
-            'updateAfter' => 'updateAfter',
-            'updateRequest' => 'updateRequest',
-            'redirect' => ['update', '@id']
-        ), $methods);
-
+        if ($ignoreDefaults !== true) {
+            $methods = array_merge(array(
+                'update' => [$this->appmodel, 'update'],
+                'find' => [$this->appmodel, 'find'],
+                'validation' => 'validation',
+                'validationAfter' => 'validationAfter',
+                'updateBefore' => 'updateBefore',
+                'updateAfter' => 'updateAfter',
+                'updateRequest' => 'updateRequest',
+                'redirect' => ['update', '@id']
+            ), $methods);
+        }
 
         if (! $record = $this->callMethod($methods['find'], $this->uri->segment(3))) {
             show_404();
@@ -139,14 +147,16 @@ abstract class AdminController extends Controller
      * Kayıt(lar) silme
      *
      * @param array $methods
+     * @param bool|false $ignoreDefaults Varsayılan metodları kullanma
      */
-    protected function delete($methods = array())
+    protected function delete($methods = array(), $ignoreDefaults = false)
     {
-        $methods = array_merge(array(
-            'delete' => [$this->appmodel, 'delete'],
-            'find' => [$this->appmodel, 'find'],
-        ), $methods);
-
+        if ($ignoreDefaults !== true) {
+            $methods = array_merge(array(
+                'delete' => [$this->appmodel, 'delete'],
+                'find' => [$this->appmodel, 'find'],
+            ), $methods);
+        }
 
         /**
          * Ajax sorgusu  ise toplu silme uygulanır
@@ -192,12 +202,15 @@ abstract class AdminController extends Controller
      * Sıralama işlemi yapar
      *
      * @param array $methods
+     * @param bool|false $ignoreDefaults Varsayılan metodları kullanma
      */
-    protected function order($methods = array())
+    protected function order($methods = array(), $ignoreDefaults = false)
     {
-        $methods = array_merge(array(
-            'order' => [$this->appmodel, 'order']
-        ), $methods);
+        if ($ignoreDefaults !== true) {
+            $methods = array_merge(array(
+                'order' => [$this->appmodel, 'order']
+            ), $methods);
+        }
 
         $ids = explode(',', $this->input->post('ids'));
 
