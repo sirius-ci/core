@@ -7,6 +7,7 @@ class Image
     private $downloadInput = 'imageUrl';
     private $tempPath = 'public/upload/temp/';
     private $uploadPath = 'public/upload/';
+    private $defaultImage = null;
     private $minWidth = 0;
     private $minHeight = 0;
     private $processes = array();
@@ -24,16 +25,19 @@ class Image
 
     public function save($defaultImage = null)
     {
+        if (! empty($defaultImage)) {
+            $this->defaultImage = $defaultImage;
+        }
+
         if ($this->ci->input->post($this->downloadInput)) {
             if ($this->required === false && empty($this->ci->input->post($this->downloadInput))) {
-                return (object) array('name' => $defaultImage);
+                return (object) array('name' => $this->defaultImage);
             }
 
             $image = $this->download($this->ci->input->post($this->downloadInput));
         } else {
             if ($this->required === false && empty($_FILES[$this->uploadInput]['name'])) {
-
-                return (object) array('name' => $defaultImage);
+                return (object) array('name' => $this->defaultImage);
             }
 
             $image = $this->upload();
@@ -41,7 +45,7 @@ class Image
 
         if ($image) {
             if ($this->checkSize($image)) {
-                $this->process($image, $defaultImage);
+                $this->process($image, $this->defaultImage);
 
                 return $image;
             } else {
@@ -74,10 +78,10 @@ class Image
      * @param null $deleteFile Silinecek dosya adı.
      * @return mixed
      */
-    public function process($image, $deleteFile = null)
+    private function process($image, $deleteFile = null)
     {
         if (empty($this->processes)) {
-            $this->ci->utils->setAlert('danger', 'Resim boyutları belirtilmemiş');
+            $this->ci->alert->set('error', 'Resim boyutları belirtilmemiş');
             $this->ci->utils->deleteFile($image->path);
 
             return false;
@@ -117,19 +121,19 @@ class Image
 
 
 
-    public function download($url)
+    private function download($url)
     {
         $info = @getimagesize($url);
 
         if (empty($info)) {
-            $this->ci->utils->setAlert('danger', 'Resim bilgisi alınamadı.');
+            $this->ci->alert->set('error', 'Resim bilgisi alınamadı.');
             return false;
         }
 
         $mimes = array('image/png' => 'png', 'image/x-png' => 'png', 'image/jpg' => 'jpg' , 'image/jpe' => 'jpg', 'image/jpeg' => 'jpg', 'image/pjpeg' => 'jpg', 'image/gif' => 'gif');
 
         if (! isset($mimes[$info['mime']])){
-            $this->ci->utils->setAlert('danger', 'Geçersiz resim dosyası.');
+            $this->ci->alert->set('error', 'Geçersiz resim dosyası.');
             return false;
         }
 
@@ -154,7 +158,7 @@ class Image
      * Resim yükler
      * @return boolean
      */
-    public function upload()
+    private function upload()
     {
         $this->ci->load->library('upload');
         $this->ci->upload->initialize([
@@ -171,7 +175,7 @@ class Image
                     'id'		=> 'id'
                 ));
             } else {
-                $this->ci->utils->setAlert('danger', $this->ci->upload->display_errors('<div>&bull; ', '</div>'));
+                $this->ci->alert->set('error', $this->ci->upload->display_errors('<div>&bull; ', '</div>'));
             }
 
             return false;
@@ -197,9 +201,8 @@ class Image
      * @param $image
      * @return bool
      */
-    public function checkSize($image)
+    private function checkSize($image)
     {
-        var_dump($image);
         if ($image->width < $this->minWidth || $image->height < $this->minHeight) {
             if ($this->plupload === true) {
                 echo json_encode(array(
@@ -208,7 +211,7 @@ class Image
                     'id'		=> 'id'
                 ));
             } else {
-                $this->ci->utils->setAlert('danger', '<div>&bull; Resim boyutları en az '. $this->minWidth .'x'. $this->minHeight .'px olmalı.</div>');
+                $this->ci->alert->set('error', '<div>&bull; Resim boyutları en az '. $this->minWidth .'x'. $this->minHeight .'px olmalı.</div>');
             }
             return false;
         }
@@ -223,6 +226,7 @@ class Image
         $this->downloadInput = 'imageUrl';
         $this->tempPath = 'public/upload/temp/';
         $this->uploadPath = 'public/upload/';
+        $this->defaultImage = null;
         $this->minWidth = 0;
         $this->minHeight = 0;
         $this->processes = array();
@@ -256,6 +260,12 @@ class Image
     public function setDownloadInput($name)
     {
         $this->downloadInput = $name;
+        return $this;
+    }
+
+    public function setDefaultImage($image)
+    {
+        $this->defaultImage = $image;
         return $this;
     }
 
