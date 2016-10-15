@@ -1,7 +1,8 @@
 <?php
 
+use Sirius\Application\Controller;
 
-class HomeController  extends CI_Controller
+class HomeController  extends Controller
 {
 
     public $module = 'home';
