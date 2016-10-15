@@ -42,23 +42,6 @@ function bsFormPassword($name, $title, $arguments = array())
 
 }
 
-function bsFormSlug($name, $title, $arguments = array())
-{
-    $required = ! empty($arguments['required']) ? 'required="required"' : '';
-    $checked = ! empty($arguments['checked']) ? 'checked="checked"' : '';
-    $value = ! empty($arguments['value']) ? $arguments['value'] : set_value($name);
-    $class = ! empty($arguments['class']) ? $arguments['class'] : '';
-
-    return '<div class="form-group">
-    <label for="'. $name .'">'. $title .'</label>
-    <input type="text" class="form-control '. $class .'" name="'. $name .'" id="'. $name .'" '. $required .' value="'. $value .'">
-    <div class="checkbox">
-        <label><input type="checkbox" name="autoSlug" value="true" '. $checked .'> Başlığa göre oluştur.</label>
-    </div>
-    </div>';
-
-}
-
 function bsFormDropdown($name, $title, $arguments = array())
 {
     $required = ! empty($arguments['required']) ? 'required="required"' : '';
