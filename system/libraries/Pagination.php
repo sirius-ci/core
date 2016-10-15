@@ -59,6 +59,7 @@ class CI_Pagination {
 	var $query_string_segment = 'per_page';
 	var $display_pages		= TRUE;
 	var $anchor_class		= '';
+	var $offset		        = 0;
 
 	/**
 	 * Constructor
@@ -102,6 +103,28 @@ class CI_Pagination {
 				}
 			}
 		}
+
+
+
+        $CI =& get_instance();
+
+        if ($CI->config->item('enable_query_strings') === TRUE OR $this->page_query_string === TRUE) {
+
+            $cur_page = (int) $CI->input->get($this->query_string_segment);
+            $num_pages = ceil($this->total_rows / $this->per_page);
+
+
+            if ($cur_page >= $num_pages) {
+                $cur_page = $num_pages - 1;
+            } elseif ($cur_page > 0) {
+                $cur_page = $cur_page - 1;
+            } else {
+                $cur_page = 0;
+            }
+
+            $this->offset = $cur_page * $this->per_page;
+
+        }
 	}
 
 	// --------------------------------------------------------------------
@@ -214,7 +237,13 @@ class CI_Pagination {
 		// string. If post, add a trailing slash to the base URL if needed
 		if ($CI->config->item('enable_query_strings') === TRUE OR $this->page_query_string === TRUE)
 		{
-			$this->base_url = rtrim($this->base_url).'&amp;'.$this->query_string_segment.'=';
+            $query = $_GET;
+            unset($query[$this->query_string_segment]);
+            $query[$this->query_string_segment] = '';
+
+            $query = http_build_query($query);
+
+			$this->base_url = rtrim($this->base_url).'?'.$query;
 		}
 		else
 		{
@@ -228,7 +257,7 @@ class CI_Pagination {
 		if  ($this->first_link !== FALSE AND $this->cur_page > ($this->num_links + 1))
 		{
 			$first_url = ($this->first_url == '') ? $this->base_url : $this->first_url;
-			$output .= $this->first_tag_open.'<a '.$this->anchor_class.'href="'.$first_url.'">'.$this->first_link.'</a>'.$this->first_tag_close;
+			$output .= $this->first_tag_open.'<a '.$this->anchor_class.'href="'.$first_url.'1">'.$this->first_link.'</a>'.$this->first_tag_close;
 		}
 
 		// Render the "previous" link
@@ -286,7 +315,10 @@ class CI_Pagination {
 						}
 						else
 						{
-							$n = ($n == '') ? '' : $this->prefix.$n.$this->suffix;
+                            if ($this->use_page_numbers && $n == '') {
+                                $n = 1;
+                            }
+							$n = ($n == '') ? 0 : $this->prefix.$n.$this->suffix;
 
 							$output .= $this->num_tag_open.'<a '.$this->anchor_class.'href="'.$this->base_url.$n.'">'.$loop.'</a>'.$this->num_tag_close;
 						}

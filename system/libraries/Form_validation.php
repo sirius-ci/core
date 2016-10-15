@@ -268,7 +268,22 @@ class CI_Form_validation {
 		return $str;
 	}
 
-	// --------------------------------------------------------------------
+
+    /**
+     * Eklendi.
+     *
+     * @return array|bool
+     */
+	public function errors()
+	{
+		if (count($this->_error_array) === 0) {
+			return false;
+		}
+
+        return $this->_error_array;
+	}
+
+
 
 	/**
 	 * Run the Validator
