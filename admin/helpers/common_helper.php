@@ -90,15 +90,19 @@ function clink($segments, $query = null, $saveQuery = false)
  * @param $uri
  * @return mixed
  */
-
 function reservedUri($uri)
 {
     static $uriParam = array();
 
     if (empty ($uriParam)) {
         $uriList = get_instance()->config->item(get_instance()->language, 'reservedUri');
-        $uriParam['keys'] = array_keys($uriList);
-        $uriParam['values'] = array_values($uriList);
+        $uriParam['keys'] = array();
+        $uriParam['values'] = array();
+
+        if ($uriList) {
+            $uriParam['keys'] = array_keys($uriList);
+            $uriParam['values'] = array_values($uriList);
+        }
     }
 
     return str_replace($uriParam['keys'], $uriParam['values'], $uri);
