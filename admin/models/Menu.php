@@ -169,12 +169,13 @@ class Menu extends AdminModel
 
     public function insert($parent, $data)
     {
+        $order = $this->makeLastOrder(array('parentId' => $parent->id));
         $this->db->insert($this->table, array(
             'parentId' => $parent->id,
             'title' => $data['title'],
             'hint' => $data['hint'],
             'link' => $data['link'],
-            'order' => $this->makeLastOrder(array('parentId' => $parent->id)),
+            'order' => $order,
             'language' => $this->language,
         ));
 
