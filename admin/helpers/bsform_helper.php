@@ -6,11 +6,13 @@ function bsFormText($name, $title, $arguments = array())
     $required = ! empty($arguments['required']) ? 'required="required"' : '';
     $value = ! empty($arguments['value']) ? $arguments['value'] : set_value($name);
     $class = ! empty($arguments['class']) ? $arguments['class'] : '';
+    $disabled = ! empty($arguments['disabled']) ? 'disabled="disabled"' : '';
+    $readonly = ! empty($arguments['readonly']) ? 'readonly="readonly"' : '';
 
 
     return '<div class="form-group">
     <label for="'. $name .'">'. $title .'</label>
-    <input type="text" class="form-control '. $class .'" name="'. $name .'" id="'. $name .'" '. $required .' value="'. $value .'">
+    <input type="text" class="form-control '. $class .'" name="'. $name .'" id="'. $name .'" '. $required .' value="'. $value .'" '. $disabled .' '. $readonly .'>
     </div>';
 
 }
@@ -20,11 +22,13 @@ function bsFormNumber($name, $title, $arguments = array())
     $required = ! empty($arguments['required']) ? 'required="required"' : '';
     $value = ! empty($arguments['value']) ? $arguments['value'] : set_value($name);
     $class = ! empty($arguments['class']) ? $arguments['class'] : '';
+    $disabled = ! empty($arguments['disabled']) ? 'disabled="disabled"' : '';
+    $readonly = ! empty($arguments['readonly']) ? 'readonly="readonly"' : '';
 
 
     return '<div class="form-group">
     <label for="'. $name .'">'. $title .'</label>
-    <input type="number" class="form-control '. $class .'" name="'. $name .'" id="'. $name .'" '. $required .' value="'. $value .'">
+    <input type="number" class="form-control '. $class .'" name="'. $name .'" id="'. $name .'" '. $required .' value="'. $value .'" '. $disabled .' '. $readonly .'>
     </div>';
 
 }
@@ -34,10 +38,12 @@ function bsFormPassword($name, $title, $arguments = array())
     $required = ! empty($arguments['required']) ? 'required="required"' : '';
     $value = ! empty($arguments['value']) ? $arguments['value'] : set_value($name);
     $class = ! empty($arguments['class']) ? $arguments['class'] : '';
+    $disabled = ! empty($arguments['disabled']) ? 'disabled="disabled"' : '';
+    $readonly = ! empty($arguments['readonly']) ? 'readonly="readonly"' : '';
 
     return '<div class="form-group">
     <label for="'. $name .'">'. $title .'</label>
-    <input type="password" class="form-control '. $class .'" name="'. $name .'" id="'. $name .'" '. $required .' value="'. $value .'">
+    <input type="password" class="form-control '. $class .'" name="'. $name .'" id="'. $name .'" '. $required .' value="'. $value .'" '. $disabled .' '. $readonly .'>
     </div>';
 
 }
@@ -48,8 +54,10 @@ function bsFormDropdown($name, $title, $arguments = array())
     $value = ! empty($arguments['value']) ? $arguments['value'] : set_value($name);
     $options = ! empty($arguments['options']) ? $arguments['options'] : array();
     $class = ! empty($arguments['class']) ? $arguments['class'] : '';
+    $disabled = ! empty($arguments['disabled']) ? 'disabled="disabled"' : '';
+    $readonly = ! empty($arguments['readonly']) ? 'readonly="readonly"' : '';
 
-    $drowndown = form_dropdown($name, $options, $value, 'class="form-control '. $class .'" '. $required .' id="'. $name .'"');
+    $drowndown = form_dropdown($name, $options, $value, 'class="form-control '. $class .'" '. $required .' id="'. $name .'" '. $disabled .' '. $readonly .'');
 
     return '<div class="form-group"><label for="'. $name .'">'. $title .'</label>'. $drowndown .'</div>';
 }
@@ -60,10 +68,12 @@ function bsFormTextarea($name, $title, $arguments = array())
     $value = ! empty($arguments['value']) ? $arguments['value'] : set_value($name);
     $rows = ! empty($arguments['rows']) ? $arguments['rows'] : 5;
     $class = ! empty($arguments['class']) ? $arguments['class'] : '';
+    $disabled = ! empty($arguments['disabled']) ? 'disabled="disabled"' : '';
+    $readonly = ! empty($arguments['readonly']) ? 'readonly="readonly"' : '';
 
     return '<div class="form-group">
     <label for="'. $name .'">'. $title .'</label>
-    <textarea class="form-control '. $class .'" name="'. $name .'" id="'. $name .'" '. $required .' rows="'. $rows .'">'. $value .'</textarea>
+    <textarea class="form-control '. $class .'" name="'. $name .'" id="'. $name .'" '. $required .' rows="'. $rows .'" '. $disabled .' '. $readonly .'>'. $value .'</textarea>
     </div>';
 }
 
