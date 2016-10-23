@@ -235,7 +235,9 @@ class ModuleAdminController extends AdminController
 
         // Module dizin kontrolü yapılır.
         if (!file_exists($this->repositoryPath)) {
-            throw new \Exception('Repository dizini bulunamadi.');
+            $this->alert->set('error', 'Repository dizini bulunamadı.');
+
+            return $modules;
         }
 
         $moduleIterator = new \DirectoryIterator($this->repositoryPath);
