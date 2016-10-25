@@ -72,6 +72,16 @@ class Date
         return $this->diff->h;
     }
 
+    public function diffSecond()
+    {
+        return $this->diff->s;
+    }
+
+    public function diffInvert()
+    {
+        return $this->diff->invert;
+    }
+
 
     public function day()
     {

@@ -124,7 +124,7 @@ class Menu extends AdminModel
 
         if (isset($pattern['link']) && isset($pattern['title']) && isset($pattern['hint'])) {
             $results = $this->db
-                ->from($module->table)
+                ->from($pattern['table'])
                 ->order_by('id', 'asc')
                 ->get()
                 ->result();
